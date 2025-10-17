@@ -17,3 +17,4 @@ mnist_test_torch
 mnist_train_torch
 lmdb
 checkpoints
+logs
