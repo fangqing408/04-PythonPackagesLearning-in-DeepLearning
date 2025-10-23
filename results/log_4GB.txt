@@ -1,0 +1,307 @@
+================ Testing subset: 4 GB ================
+Selected 503448 images (~4.00 GB).
+Warming up OS page cache (preloading images into memory)...
+Warm-up: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 503448/503448 [31:49<00:00, 263.63it/s]
+Warm-up done in 1909.70s. All images have been cached into OS memory.
+
+4GB experiments:   0%|                                                      | 0/150 [00:00<?, ?it/s]method: torchvision, num_workers: 0, batch_size: 64, pin_memory: False
+Total: 151.56s | Avg batch: 0.019s | Throughput: 3321.8 img/s | CPU: 10.9% | RAM: 15.24GB (47.8%) | GPU: 13.0% | VRAM: 0.66/24.00 GB
+4GB experiments:   1%|▎                                          | 1/150 [02:31<6:16:30, 151.62s/it]method: torchvision, num_workers: 0, batch_size: 64, pin_memory: True
+Total: 152.48s | Avg batch: 0.019s | Throughput: 3301.7 img/s | CPU: 51.9% | RAM: 15.37GB (48.2%) | GPU: 13.0% | VRAM: 0.91/24.00 GB
+4GB experiments:   1%|▌                                          | 2/150 [05:04<6:15:18, 152.15s/it]method: torchvision, num_workers: 0, batch_size: 128, pin_memory: False
+Total: 140.32s | Avg batch: 0.036s | Throughput: 3587.9 img/s | CPU: 51.8% | RAM: 15.40GB (48.3%) | GPU: 13.0% | VRAM: 0.90/24.00 GB
+4GB experiments:   2%|▊                                          | 3/150 [07:24<5:59:35, 146.77s/it]method: torchvision, num_workers: 0, batch_size: 128, pin_memory: True
+Total: 149.16s | Avg batch: 0.038s | Throughput: 3375.2 img/s | CPU: 51.9% | RAM: 15.48GB (48.6%) | GPU: 14.0% | VRAM: 0.90/24.00 GB
+4GB experiments:   3%|█▏                                         | 4/150 [09:53<5:59:29, 147.74s/it]method: torchvision, num_workers: 0, batch_size: 256, pin_memory: False
+Total: 138.83s | Avg batch: 0.071s | Throughput: 3626.4 img/s | CPU: 51.8% | RAM: 15.51GB (48.7%) | GPU: 14.0% | VRAM: 0.90/24.00 GB
+4GB experiments:   3%|█▍                                         | 5/150 [12:12<5:49:19, 144.55s/it]method: torchvision, num_workers: 0, batch_size: 256, pin_memory: True
+Total: 148.30s | Avg batch: 0.075s | Throughput: 3394.8 img/s | CPU: 51.7% | RAM: 15.63GB (49.1%) | GPU: 13.0% | VRAM: 0.90/24.00 GB
+4GB experiments:   4%|█▋                                         | 6/150 [14:40<5:50:00, 145.84s/it]method: torchvision, num_workers: 0, batch_size: 384, pin_memory: False
+Total: 138.84s | Avg batch: 0.106s | Throughput: 3626.0 img/s | CPU: 52.1% | RAM: 15.09GB (47.4%) | GPU: 14.0% | VRAM: 0.90/24.00 GB
+4GB experiments:   5%|██                                         | 7/150 [16:59<5:42:10, 143.57s/it]method: torchvision, num_workers: 0, batch_size: 384, pin_memory: True
+Total: 147.62s | Avg batch: 0.113s | Throughput: 3410.4 img/s | CPU: 51.7% | RAM: 15.36GB (48.2%) | GPU: 13.0% | VRAM: 0.90/24.00 GB
+4GB experiments:   5%|██▎                                        | 8/150 [19:27<5:42:51, 144.87s/it]method: torchvision, num_workers: 0, batch_size: 512, pin_memory: False
+Total: 138.53s | Avg batch: 0.141s | Throughput: 3634.1 img/s | CPU: 51.7% | RAM: 15.41GB (48.4%) | GPU: 13.0% | VRAM: 0.90/24.00 GB
+4GB experiments:   6%|██▌                                        | 9/150 [21:46<5:35:49, 142.90s/it]method: torchvision, num_workers: 0, batch_size: 512, pin_memory: True
+Total: 147.76s | Avg batch: 0.150s | Throughput: 3407.1 img/s | CPU: 51.7% | RAM: 15.46GB (48.5%) | GPU: 15.0% | VRAM: 0.90/24.00 GB
+4GB experiments:   7%|██▊                                       | 10/150 [24:13<5:36:58, 144.42s/it]method: torchvision, num_workers: 2, batch_size: 64, pin_memory: False
+Total: 96.42s | Avg batch: 0.012s | Throughput: 5221.5 img/s | CPU: 16.0% | RAM: 15.30GB (48.0%) | GPU: 13.0% | VRAM: 0.90/24.00 GB
+4GB experiments:   7%|███                                       | 11/150 [25:50<5:00:34, 129.74s/it]method: torchvision, num_workers: 2, batch_size: 64, pin_memory: True
+Total: 95.60s | Avg batch: 0.012s | Throughput: 5266.2 img/s | CPU: 16.6% | RAM: 15.35GB (48.2%) | GPU: 0.0% | VRAM: 0.69/24.00 GB
+4GB experiments:   8%|███▎                                      | 12/150 [27:26<4:34:33, 119.37s/it]method: torchvision, num_workers: 2, batch_size: 128, pin_memory: False
+Total: 95.38s | Avg batch: 0.024s | Throughput: 5278.6 img/s | CPU: 15.0% | RAM: 15.34GB (48.1%) | GPU: 0.0% | VRAM: 0.70/24.00 GB
+4GB experiments:   9%|███▋                                      | 13/150 [29:01<4:15:59, 112.12s/it]method: torchvision, num_workers: 2, batch_size: 128, pin_memory: True
+Total: 95.90s | Avg batch: 0.024s | Throughput: 5249.7 img/s | CPU: 16.5% | RAM: 15.34GB (48.1%) | GPU: 0.0% | VRAM: 0.69/24.00 GB
+4GB experiments:   9%|███▉                                      | 14/150 [30:37<4:03:03, 107.23s/it]method: torchvision, num_workers: 2, batch_size: 256, pin_memory: False
+Total: 94.92s | Avg batch: 0.048s | Throughput: 5304.2 img/s | CPU: 14.7% | RAM: 15.45GB (48.5%) | GPU: 0.0% | VRAM: 0.70/24.00 GB
+4GB experiments:  10%|████▏                                     | 15/150 [32:12<3:52:57, 103.54s/it]method: torchvision, num_workers: 2, batch_size: 256, pin_memory: True
+Total: 96.18s | Avg batch: 0.049s | Throughput: 5234.5 img/s | CPU: 16.3% | RAM: 15.49GB (48.6%) | GPU: 0.0% | VRAM: 0.70/24.00 GB
+4GB experiments:  11%|████▍                                     | 16/150 [33:48<3:46:19, 101.34s/it]method: torchvision, num_workers: 2, batch_size: 384, pin_memory: False
+Total: 94.99s | Avg batch: 0.072s | Throughput: 5300.0 img/s | CPU: 14.9% | RAM: 15.49GB (48.6%) | GPU: 0.0% | VRAM: 0.70/24.00 GB
+4GB experiments:  11%|████▊                                      | 17/150 [35:23<3:40:25, 99.44s/it]method: torchvision, num_workers: 2, batch_size: 384, pin_memory: True
+Total: 96.09s | Avg batch: 0.073s | Throughput: 5239.3 img/s | CPU: 16.6% | RAM: 15.61GB (49.0%) | GPU: 0.0% | VRAM: 0.70/24.00 GB
+4GB experiments:  12%|█████▏                                     | 18/150 [36:59<3:36:35, 98.45s/it]method: torchvision, num_workers: 2, batch_size: 512, pin_memory: False
+Total: 95.18s | Avg batch: 0.097s | Throughput: 5289.3 img/s | CPU: 15.5% | RAM: 15.62GB (49.0%) | GPU: 0.0% | VRAM: 0.70/24.00 GB
+4GB experiments:  13%|█████▍                                     | 19/150 [38:35<3:32:49, 97.48s/it]method: torchvision, num_workers: 2, batch_size: 512, pin_memory: True
+Total: 95.94s | Avg batch: 0.097s | Throughput: 5247.6 img/s | CPU: 17.3% | RAM: 15.59GB (48.9%) | GPU: 0.0% | VRAM: 0.70/24.00 GB
+4GB experiments:  13%|█████▋                                     | 20/150 [40:10<3:30:14, 97.03s/it]method: torchvision, num_workers: 4, batch_size: 64, pin_memory: False
+Total: 65.78s | Avg batch: 0.008s | Throughput: 7653.1 img/s | CPU: 28.1% | RAM: 15.62GB (49.0%) | GPU: 15.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  14%|██████                                     | 21/150 [41:16<3:08:29, 87.67s/it]method: torchvision, num_workers: 4, batch_size: 64, pin_memory: True
+Total: 64.49s | Avg batch: 0.008s | Throughput: 7806.9 img/s | CPU: 28.8% | RAM: 15.64GB (49.1%) | GPU: 14.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  15%|██████▎                                    | 22/150 [42:21<2:52:13, 80.73s/it]method: torchvision, num_workers: 4, batch_size: 128, pin_memory: False
+Total: 64.29s | Avg batch: 0.016s | Throughput: 7830.7 img/s | CPU: 26.7% | RAM: 15.67GB (49.2%) | GPU: 16.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  15%|██████▌                                    | 23/150 [43:25<2:40:28, 75.81s/it]method: torchvision, num_workers: 4, batch_size: 128, pin_memory: True
+Total: 64.63s | Avg batch: 0.016s | Throughput: 7789.8 img/s | CPU: 28.9% | RAM: 15.72GB (49.3%) | GPU: 15.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  16%|██████▉                                    | 24/150 [44:30<2:32:11, 72.47s/it]method: torchvision, num_workers: 4, batch_size: 256, pin_memory: False
+Total: 63.00s | Avg batch: 0.032s | Throughput: 7991.1 img/s | CPU: 26.4% | RAM: 15.75GB (49.4%) | GPU: 15.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  17%|███████▏                                   | 25/150 [45:33<2:25:06, 69.65s/it]method: torchvision, num_workers: 4, batch_size: 256, pin_memory: True
+Total: 64.98s | Avg batch: 0.033s | Throughput: 7747.4 img/s | CPU: 28.8% | RAM: 15.83GB (49.7%) | GPU: 14.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  17%|███████▍                                   | 26/150 [46:38<2:21:05, 68.27s/it]method: torchvision, num_workers: 4, batch_size: 384, pin_memory: False
+Total: 63.27s | Avg batch: 0.048s | Throughput: 7956.6 img/s | CPU: 26.7% | RAM: 15.84GB (49.7%) | GPU: 15.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  18%|███████▋                                   | 27/150 [47:41<2:16:54, 66.79s/it]method: torchvision, num_workers: 4, batch_size: 384, pin_memory: True
+Total: 65.13s | Avg batch: 0.050s | Throughput: 7729.7 img/s | CPU: 29.0% | RAM: 16.06GB (50.4%) | GPU: 17.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  19%|████████                                   | 28/150 [48:47<2:14:49, 66.31s/it]method: torchvision, num_workers: 4, batch_size: 512, pin_memory: False
+Total: 63.57s | Avg batch: 0.065s | Throughput: 7920.0 img/s | CPU: 26.9% | RAM: 16.04GB (50.4%) | GPU: 15.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  19%|████████▎                                  | 29/150 [49:50<2:12:05, 65.50s/it]method: torchvision, num_workers: 4, batch_size: 512, pin_memory: True
+Total: 65.65s | Avg batch: 0.067s | Throughput: 7668.6 img/s | CPU: 29.8% | RAM: 16.18GB (50.8%) | GPU: 15.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  20%|████████▌                                  | 30/150 [50:56<2:11:07, 65.56s/it]method: torchvision, num_workers: 8, batch_size: 64, pin_memory: False
+Total: 64.45s | Avg batch: 0.008s | Throughput: 7811.1 img/s | CPU: 38.7% | RAM: 16.32GB (51.2%) | GPU: 14.0% | VRAM: 0.91/24.00 GB
+4GB experiments:  21%|████████▉                                  | 31/150 [52:00<2:09:23, 65.24s/it]method: torchvision, num_workers: 8, batch_size: 64, pin_memory: True
+Total: 74.48s | Avg batch: 0.009s | Throughput: 6759.6 img/s | CPU: 31.0% | RAM: 16.36GB (51.3%) | GPU: 13.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  21%|█████████▏                                 | 32/150 [53:15<2:13:47, 68.03s/it]method: torchvision, num_workers: 8, batch_size: 128, pin_memory: False
+Total: 63.41s | Avg batch: 0.016s | Throughput: 7939.7 img/s | CPU: 38.4% | RAM: 16.29GB (51.1%) | GPU: 14.0% | VRAM: 0.91/24.00 GB
+4GB experiments:  22%|█████████▍                                 | 33/150 [54:18<2:09:59, 66.66s/it]method: torchvision, num_workers: 8, batch_size: 128, pin_memory: True
+Total: 73.84s | Avg batch: 0.019s | Throughput: 6818.5 img/s | CPU: 30.9% | RAM: 16.38GB (51.4%) | GPU: 14.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  23%|█████████▋                                 | 34/150 [55:32<2:13:04, 68.83s/it]method: torchvision, num_workers: 8, batch_size: 256, pin_memory: False
+Total: 63.04s | Avg batch: 0.032s | Throughput: 7985.8 img/s | CPU: 38.9% | RAM: 16.31GB (51.2%) | GPU: 14.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  23%|██████████                                 | 35/150 [56:35<2:08:37, 67.11s/it]method: torchvision, num_workers: 8, batch_size: 256, pin_memory: True
+Total: 79.41s | Avg batch: 0.040s | Throughput: 6340.1 img/s | CPU: 40.3% | RAM: 16.44GB (51.6%) | GPU: 13.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  24%|██████████▎                                | 36/150 [57:55<2:14:33, 70.82s/it]method: torchvision, num_workers: 8, batch_size: 384, pin_memory: False
+Total: 65.25s | Avg batch: 0.050s | Throughput: 7715.4 img/s | CPU: 41.8% | RAM: 16.26GB (51.0%) | GPU: 16.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  25%|██████████▌                                | 37/150 [59:00<2:10:15, 69.17s/it]method: torchvision, num_workers: 8, batch_size: 384, pin_memory: True
+Total: 79.52s | Avg batch: 0.061s | Throughput: 6330.9 img/s | CPU: 40.6% | RAM: 16.51GB (51.8%) | GPU: 17.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  25%|██████████▍                              | 38/150 [1:00:20<2:14:56, 72.29s/it]method: torchvision, num_workers: 8, batch_size: 512, pin_memory: False
+Total: 71.54s | Avg batch: 0.073s | Throughput: 7037.0 img/s | CPU: 40.8% | RAM: 16.43GB (51.6%) | GPU: 14.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  26%|██████████▋                              | 39/150 [1:01:31<2:13:21, 72.08s/it]method: torchvision, num_workers: 8, batch_size: 512, pin_memory: True
+Total: 80.25s | Avg batch: 0.082s | Throughput: 6273.7 img/s | CPU: 40.9% | RAM: 16.36GB (51.4%) | GPU: 15.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  27%|██████████▉                              | 40/150 [1:02:52<2:16:40, 74.55s/it]method: torchvision, num_workers: 12, batch_size: 64, pin_memory: False
+Total: 76.22s | Avg batch: 0.010s | Throughput: 6605.0 img/s | CPU: 42.7% | RAM: 16.41GB (51.5%) | GPU: 10.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  27%|███████████▏                             | 41/150 [1:04:08<2:16:22, 75.06s/it]method: torchvision, num_workers: 12, batch_size: 64, pin_memory: True
+Total: 89.02s | Avg batch: 0.011s | Throughput: 5655.3 img/s | CPU: 27.0% | RAM: 16.39GB (51.5%) | GPU: 0.0% | VRAM: 0.70/24.00 GB
+4GB experiments:  28%|███████████▍                             | 42/150 [1:05:37<2:22:41, 79.27s/it]method: torchvision, num_workers: 12, batch_size: 128, pin_memory: False
+Total: 74.83s | Avg batch: 0.019s | Throughput: 6728.2 img/s | CPU: 42.4% | RAM: 16.29GB (51.1%) | GPU: 1.0% | VRAM: 0.70/24.00 GB
+4GB experiments:  29%|███████████▊                             | 43/150 [1:06:52<2:19:01, 77.96s/it]method: torchvision, num_workers: 12, batch_size: 128, pin_memory: True
+Total: 93.11s | Avg batch: 0.024s | Throughput: 5406.9 img/s | CPU: 34.8% | RAM: 16.29GB (51.1%) | GPU: 0.0% | VRAM: 0.70/24.00 GB
+4GB experiments:  29%|████████████                             | 44/150 [1:08:25<2:25:46, 82.52s/it]method: torchvision, num_workers: 12, batch_size: 256, pin_memory: False
+Total: 76.77s | Avg batch: 0.039s | Throughput: 6557.9 img/s | CPU: 44.8% | RAM: 16.11GB (50.6%) | GPU: 0.0% | VRAM: 0.70/24.00 GB
+4GB experiments:  30%|████████████▎                            | 45/150 [1:09:42<2:21:25, 80.81s/it]method: torchvision, num_workers: 12, batch_size: 256, pin_memory: True
+Total: 92.98s | Avg batch: 0.047s | Throughput: 5414.8 img/s | CPU: 35.1% | RAM: 16.03GB (50.3%) | GPU: 0.0% | VRAM: 0.70/24.00 GB
+4GB experiments:  31%|████████████▌                            | 46/150 [1:11:15<2:26:25, 84.48s/it]method: torchvision, num_workers: 12, batch_size: 384, pin_memory: False
+Total: 76.68s | Avg batch: 0.058s | Throughput: 6565.8 img/s | CPU: 45.7% | RAM: 15.84GB (49.7%) | GPU: 14.0% | VRAM: 0.90/24.00 GB
+4GB experiments:  31%|████████████▊                            | 47/150 [1:12:32<2:21:01, 82.15s/it]method: torchvision, num_workers: 12, batch_size: 384, pin_memory: True
+Total: 94.98s | Avg batch: 0.072s | Throughput: 5300.3 img/s | CPU: 36.4% | RAM: 15.80GB (49.6%) | GPU: 2.0% | VRAM: 0.91/24.00 GB
+4GB experiments:  32%|█████████████                            | 48/150 [1:14:07<2:26:13, 86.02s/it]method: torchvision, num_workers: 12, batch_size: 512, pin_memory: False
+Total: 78.08s | Avg batch: 0.079s | Throughput: 6448.0 img/s | CPU: 46.4% | RAM: 15.41GB (48.4%) | GPU: 15.0% | VRAM: 0.91/24.00 GB
+4GB experiments:  33%|█████████████▍                           | 49/150 [1:15:25<2:20:49, 83.65s/it]method: torchvision, num_workers: 12, batch_size: 512, pin_memory: True
+Total: 93.96s | Avg batch: 0.095s | Throughput: 5358.0 img/s | CPU: 35.9% | RAM: 15.63GB (49.1%) | GPU: 16.0% | VRAM: 0.91/24.00 GB
+4GB experiments:  33%|█████████████▋                           | 50/150 [1:16:59<2:24:36, 86.76s/it]method: PIL, num_workers: 0, batch_size: 64, pin_memory: False
+Total: 285.67s | Avg batch: 0.036s | Throughput: 1762.4 img/s | CPU: 52.4% | RAM: 15.60GB (49.0%) | GPU: 4.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  34%|█████████████▌                          | 51/150 [1:21:44<4:01:38, 146.45s/it]method: PIL, num_workers: 0, batch_size: 64, pin_memory: True
+Total: 290.70s | Avg batch: 0.037s | Throughput: 1731.9 img/s | CPU: 52.0% | RAM: 15.58GB (48.9%) | GPU: 13.0% | VRAM: 0.91/24.00 GB
+4GB experiments:  35%|█████████████▊                          | 52/150 [1:26:35<5:09:54, 189.74s/it]method: PIL, num_workers: 0, batch_size: 128, pin_memory: False
+Total: 283.54s | Avg batch: 0.072s | Throughput: 1775.6 img/s | CPU: 52.4% | RAM: 15.89GB (49.9%) | GPU: 16.0% | VRAM: 0.96/24.00 GB
+4GB experiments:  35%|██████████████▏                         | 53/150 [1:31:19<5:52:15, 217.89s/it]method: PIL, num_workers: 0, batch_size: 128, pin_memory: True
+Total: 291.93s | Avg batch: 0.074s | Throughput: 1724.5 img/s | CPU: 51.9% | RAM: 15.80GB (49.6%) | GPU: 13.0% | VRAM: 0.93/24.00 GB
+4GB experiments:  36%|██████████████▍                         | 54/150 [1:36:11<6:24:11, 240.12s/it]method: PIL, num_workers: 0, batch_size: 256, pin_memory: False
+Total: 277.30s | Avg batch: 0.141s | Throughput: 1815.5 img/s | CPU: 51.8% | RAM: 15.85GB (49.8%) | GPU: 13.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  37%|██████████████▋                         | 55/150 [1:40:48<6:37:52, 251.29s/it]method: PIL, num_workers: 0, batch_size: 256, pin_memory: True
+Total: 288.51s | Avg batch: 0.147s | Throughput: 1745.0 img/s | CPU: 51.8% | RAM: 15.88GB (49.8%) | GPU: 13.0% | VRAM: 0.91/24.00 GB
+4GB experiments:  37%|██████████████▉                         | 56/150 [1:45:37<6:51:12, 262.48s/it]method: PIL, num_workers: 0, batch_size: 384, pin_memory: False
+Total: 291.72s | Avg batch: 0.222s | Throughput: 1725.8 img/s | CPU: 51.8% | RAM: 16.68GB (52.4%) | GPU: 16.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  38%|███████████████▏                        | 57/150 [1:50:29<7:00:27, 271.27s/it]method: PIL, num_workers: 0, batch_size: 384, pin_memory: True
+Total: 298.20s | Avg batch: 0.227s | Throughput: 1688.3 img/s | CPU: 51.4% | RAM: 16.17GB (50.8%) | GPU: 14.0% | VRAM: 0.91/24.00 GB
+4GB experiments:  39%|███████████████▍                        | 58/150 [1:55:27<7:08:21, 279.36s/it]method: PIL, num_workers: 0, batch_size: 512, pin_memory: False
+Total: 270.73s | Avg batch: 0.275s | Throughput: 1859.6 img/s | CPU: 41.7% | RAM: 16.13GB (50.6%) | GPU: 14.0% | VRAM: 0.91/24.00 GB
+4GB experiments:  39%|███████████████▋                        | 59/150 [1:59:58<6:59:47, 276.78s/it]method: PIL, num_workers: 0, batch_size: 512, pin_memory: True
+Total: 288.37s | Avg batch: 0.293s | Throughput: 1745.9 img/s | CPU: 43.9% | RAM: 16.72GB (52.5%) | GPU: 13.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  40%|████████████████                        | 60/150 [2:04:46<7:00:24, 280.28s/it]method: PIL, num_workers: 2, batch_size: 64, pin_memory: False
+Total: 154.98s | Avg batch: 0.020s | Throughput: 3248.4 img/s | CPU: 19.6% | RAM: 16.22GB (50.9%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  41%|████████████████▎                       | 61/150 [2:07:21<6:00:00, 242.71s/it]method: PIL, num_workers: 2, batch_size: 64, pin_memory: True
+Total: 157.33s | Avg batch: 0.020s | Throughput: 3200.0 img/s | CPU: 20.5% | RAM: 16.01GB (50.3%) | GPU: 16.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  41%|████████████████▌                       | 62/150 [2:09:58<5:18:25, 217.11s/it]method: PIL, num_workers: 2, batch_size: 128, pin_memory: False
+Total: 150.53s | Avg batch: 0.038s | Throughput: 3344.5 img/s | CPU: 19.6% | RAM: 16.02GB (50.3%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  42%|████████████████▊                       | 63/150 [2:12:29<4:45:52, 197.15s/it]method: PIL, num_workers: 2, batch_size: 128, pin_memory: True
+Total: 152.62s | Avg batch: 0.039s | Throughput: 3298.7 img/s | CPU: 20.8% | RAM: 16.12GB (50.6%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  43%|█████████████████                       | 64/150 [2:15:02<4:23:27, 183.81s/it]method: PIL, num_workers: 2, batch_size: 256, pin_memory: False
+Total: 148.11s | Avg batch: 0.075s | Throughput: 3399.1 img/s | CPU: 19.7% | RAM: 16.13GB (50.6%) | GPU: 15.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  43%|█████████████████▎                      | 65/150 [2:17:30<4:05:14, 173.12s/it]method: PIL, num_workers: 2, batch_size: 256, pin_memory: True
+Total: 149.41s | Avg batch: 0.076s | Throughput: 3369.6 img/s | CPU: 20.9% | RAM: 16.11GB (50.6%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  44%|█████████████████▌                      | 66/150 [2:19:59<3:52:25, 166.02s/it]method: PIL, num_workers: 2, batch_size: 384, pin_memory: False
+Total: 152.73s | Avg batch: 0.116s | Throughput: 3296.3 img/s | CPU: 19.1% | RAM: 15.96GB (50.1%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  45%|█████████████████▊                      | 67/150 [2:22:32<3:44:10, 162.05s/it]method: PIL, num_workers: 2, batch_size: 384, pin_memory: True
+Total: 150.60s | Avg batch: 0.115s | Throughput: 3343.0 img/s | CPU: 20.9% | RAM: 16.08GB (50.5%) | GPU: 2.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  45%|██████████████████▏                     | 68/150 [2:25:03<3:36:47, 158.63s/it]method: PIL, num_workers: 2, batch_size: 512, pin_memory: False
+Total: 146.15s | Avg batch: 0.149s | Throughput: 3444.7 img/s | CPU: 19.6% | RAM: 16.06GB (50.4%) | GPU: 13.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  46%|██████████████████▍                     | 69/150 [2:27:29<3:29:06, 154.90s/it]method: PIL, num_workers: 2, batch_size: 512, pin_memory: True
+Total: 152.21s | Avg batch: 0.155s | Throughput: 3307.5 img/s | CPU: 20.4% | RAM: 16.04GB (50.4%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  47%|██████████████████▋                     | 70/150 [2:30:01<3:25:28, 154.11s/it]method: PIL, num_workers: 4, batch_size: 64, pin_memory: False
+Total: 95.56s | Avg batch: 0.012s | Throughput: 5268.5 img/s | CPU: 33.8% | RAM: 16.11GB (50.6%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  47%|██████████████████▉                     | 71/150 [2:31:37<2:59:48, 136.56s/it]method: PIL, num_workers: 4, batch_size: 64, pin_memory: True
+Total: 101.16s | Avg batch: 0.013s | Throughput: 4976.9 img/s | CPU: 35.3% | RAM: 16.32GB (51.2%) | GPU: 27.0% | VRAM: 0.91/24.00 GB
+4GB experiments:  48%|███████████████████▏                    | 72/150 [2:33:18<2:43:44, 125.96s/it]method: PIL, num_workers: 4, batch_size: 128, pin_memory: False
+Total: 99.58s | Avg batch: 0.025s | Throughput: 5055.7 img/s | CPU: 33.7% | RAM: 16.25GB (51.0%) | GPU: 14.0% | VRAM: 0.93/24.00 GB
+4GB experiments:  49%|███████████████████▍                    | 73/150 [2:34:58<2:31:30, 118.06s/it]method: PIL, num_workers: 4, batch_size: 128, pin_memory: True
+Total: 97.94s | Avg batch: 0.025s | Throughput: 5140.6 img/s | CPU: 35.8% | RAM: 16.22GB (50.9%) | GPU: 16.0% | VRAM: 0.95/24.00 GB
+4GB experiments:  49%|███████████████████▋                    | 74/150 [2:36:36<2:21:54, 112.04s/it]method: PIL, num_workers: 4, batch_size: 256, pin_memory: False
+Total: 98.02s | Avg batch: 0.050s | Throughput: 5136.1 img/s | CPU: 33.5% | RAM: 16.16GB (50.7%) | GPU: 16.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  50%|████████████████████                    | 75/150 [2:38:14<2:14:48, 107.85s/it]method: PIL, num_workers: 4, batch_size: 256, pin_memory: True
+Total: 100.59s | Avg batch: 0.051s | Throughput: 5004.9 img/s | CPU: 34.6% | RAM: 16.11GB (50.6%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  51%|████████████████████▎                   | 76/150 [2:39:54<2:10:20, 105.68s/it]method: PIL, num_workers: 4, batch_size: 384, pin_memory: False
+Total: 99.20s | Avg batch: 0.076s | Throughput: 5075.0 img/s | CPU: 33.2% | RAM: 16.09GB (50.5%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  51%|████████████████████▌                   | 77/150 [2:41:34<2:06:14, 103.76s/it]method: PIL, num_workers: 4, batch_size: 384, pin_memory: True
+Total: 98.56s | Avg batch: 0.075s | Throughput: 5108.0 img/s | CPU: 35.2% | RAM: 16.11GB (50.6%) | GPU: 17.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  52%|████████████████████▊                   | 78/150 [2:43:12<2:02:39, 102.21s/it]method: PIL, num_workers: 4, batch_size: 512, pin_memory: False
+Total: 98.06s | Avg batch: 0.100s | Throughput: 5134.2 img/s | CPU: 32.9% | RAM: 16.10GB (50.5%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  53%|█████████████████████                   | 79/150 [2:44:50<1:59:29, 100.98s/it]method: PIL, num_workers: 4, batch_size: 512, pin_memory: True
+Total: 97.65s | Avg batch: 0.099s | Throughput: 5155.5 img/s | CPU: 35.1% | RAM: 16.08GB (50.5%) | GPU: 6.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  53%|█████████████████████▎                  | 80/150 [2:46:28<1:56:40, 100.00s/it]method: PIL, num_workers: 8, batch_size: 64, pin_memory: False
+Total: 90.19s | Avg batch: 0.011s | Throughput: 5582.1 img/s | CPU: 48.6% | RAM: 16.12GB (50.6%) | GPU: 14.0% | VRAM: 0.93/24.00 GB
+4GB experiments:  54%|██████████████████████▏                  | 81/150 [2:47:58<1:51:38, 97.07s/it]method: PIL, num_workers: 8, batch_size: 64, pin_memory: True
+Total: 99.56s | Avg batch: 0.013s | Throughput: 5056.7 img/s | CPU: 50.2% | RAM: 16.14GB (50.7%) | GPU: 16.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  55%|██████████████████████▍                  | 82/150 [2:49:38<1:50:53, 97.84s/it]method: PIL, num_workers: 8, batch_size: 128, pin_memory: False
+Total: 89.68s | Avg batch: 0.023s | Throughput: 5613.8 img/s | CPU: 48.4% | RAM: 16.14GB (50.7%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  55%|██████████████████████▋                  | 83/150 [2:51:08<1:46:32, 95.41s/it]method: PIL, num_workers: 8, batch_size: 128, pin_memory: True
+Total: 98.71s | Avg batch: 0.025s | Throughput: 5100.2 img/s | CPU: 52.1% | RAM: 16.34GB (51.3%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  56%|██████████████████████▉                  | 84/150 [2:52:46<1:46:03, 96.41s/it]method: PIL, num_workers: 8, batch_size: 256, pin_memory: False
+Total: 92.81s | Avg batch: 0.047s | Throughput: 5424.3 img/s | CPU: 51.6% | RAM: 16.34GB (51.3%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  57%|███████████████████████▏                 | 85/150 [2:54:19<1:43:17, 95.35s/it]method: PIL, num_workers: 8, batch_size: 256, pin_memory: True
+Total: 98.56s | Avg batch: 0.050s | Throughput: 5107.8 img/s | CPU: 50.2% | RAM: 16.57GB (52.0%) | GPU: 14.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  57%|███████████████████████▌                 | 86/150 [2:55:58<1:42:45, 96.33s/it]method: PIL, num_workers: 8, batch_size: 384, pin_memory: False
+Total: 97.88s | Avg batch: 0.075s | Throughput: 5143.4 img/s | CPU: 52.9% | RAM: 16.42GB (51.6%) | GPU: 16.0% | VRAM: 0.92/24.00 GB
+4GB experiments:  58%|███████████████████████▊                 | 87/150 [2:57:36<1:41:39, 96.81s/it]method: PIL, num_workers: 8, batch_size: 384, pin_memory: True
+Total: 95.54s | Avg batch: 0.073s | Throughput: 5269.4 img/s | CPU: 49.9% | RAM: 16.62GB (52.2%) | GPU: 0.0% | VRAM: 0.72/24.00 GB
+4GB experiments:  59%|████████████████████████                 | 88/150 [2:59:11<1:39:39, 96.45s/it]method: PIL, num_workers: 8, batch_size: 512, pin_memory: False
+Total: 93.84s | Avg batch: 0.095s | Throughput: 5365.2 img/s | CPU: 48.6% | RAM: 16.67GB (52.3%) | GPU: 1.0% | VRAM: 0.72/24.00 GB
+4GB experiments:  59%|████████████████████████▎                | 89/150 [3:00:45<1:37:16, 95.68s/it]method: PIL, num_workers: 8, batch_size: 512, pin_memory: True
+Total: 96.34s | Avg batch: 0.098s | Throughput: 5225.6 img/s | CPU: 48.3% | RAM: 16.64GB (52.2%) | GPU: 1.0% | VRAM: 0.72/24.00 GB
+4GB experiments:  60%|████████████████████████▌                | 90/150 [3:02:22<1:35:53, 95.89s/it]method: PIL, num_workers: 12, batch_size: 64, pin_memory: False
+Total: 109.19s | Avg batch: 0.014s | Throughput: 4610.8 img/s | CPU: 50.0% | RAM: 16.68GB (52.4%) | GPU: 1.0% | VRAM: 0.72/24.00 GB
+4GB experiments:  61%|████████████████████████▊                | 91/150 [3:04:11<1:38:13, 99.90s/it]method: PIL, num_workers: 12, batch_size: 64, pin_memory: True
+Total: 116.80s | Avg batch: 0.015s | Throughput: 4310.4 img/s | CPU: 48.5% | RAM: 16.66GB (52.3%) | GPU: 0.0% | VRAM: 0.72/24.00 GB
+4GB experiments:  61%|████████████████████████▌               | 92/150 [3:06:08<1:41:29, 104.98s/it]method: PIL, num_workers: 12, batch_size: 128, pin_memory: False
+Total: 118.06s | Avg batch: 0.030s | Throughput: 4264.3 img/s | CPU: 57.3% | RAM: 16.68GB (52.4%) | GPU: 0.0% | VRAM: 0.72/24.00 GB
+4GB experiments:  62%|████████████████████████▊               | 93/150 [3:08:06<1:43:28, 108.92s/it]method: PIL, num_workers: 12, batch_size: 128, pin_memory: True
+Total: 119.35s | Avg batch: 0.030s | Throughput: 4218.4 img/s | CPU: 55.3% | RAM: 16.68GB (52.3%) | GPU: 0.0% | VRAM: 0.72/24.00 GB
+4GB experiments:  63%|█████████████████████████               | 94/150 [3:10:05<1:44:35, 112.06s/it]method: PIL, num_workers: 12, batch_size: 256, pin_memory: False
+Total: 111.90s | Avg batch: 0.057s | Throughput: 4499.2 img/s | CPU: 60.1% | RAM: 16.71GB (52.4%) | GPU: 0.0% | VRAM: 0.72/24.00 GB
+4GB experiments:  63%|█████████████████████████▎              | 95/150 [3:11:57<1:42:41, 112.03s/it]method: PIL, num_workers: 12, batch_size: 256, pin_memory: True
+Total: 116.68s | Avg batch: 0.059s | Throughput: 4314.8 img/s | CPU: 56.4% | RAM: 16.68GB (52.4%) | GPU: 0.0% | VRAM: 0.72/24.00 GB
+4GB experiments:  64%|█████████████████████████▌              | 96/150 [3:13:54<1:42:05, 113.44s/it]method: PIL, num_workers: 12, batch_size: 384, pin_memory: False
+Total: 110.36s | Avg batch: 0.084s | Throughput: 4561.8 img/s | CPU: 58.9% | RAM: 16.66GB (52.3%) | GPU: 0.0% | VRAM: 0.72/24.00 GB
+4GB experiments:  65%|█████████████████████████▊              | 97/150 [3:15:44<1:39:24, 112.53s/it]method: PIL, num_workers: 12, batch_size: 384, pin_memory: True
+Total: 117.67s | Avg batch: 0.090s | Throughput: 4278.4 img/s | CPU: 56.3% | RAM: 16.62GB (52.2%) | GPU: 0.0% | VRAM: 0.72/24.00 GB
+4GB experiments:  65%|██████████████████████████▏             | 98/150 [3:17:42<1:38:52, 114.09s/it]method: PIL, num_workers: 12, batch_size: 512, pin_memory: False
+Total: 3830.65s | Avg batch: 3.893s | Throughput: 131.4 img/s | CPU: 53.6% | RAM: 15.81GB (49.6%) | GPU: 14.0% | VRAM: 0.47/24.00 GB
+4GB experiments:  66%|█████████████████████████             | 99/150 [4:21:32<17:24:36, 1228.95s/it]method: PIL, num_workers: 12, batch_size: 512, pin_memory: True
+Total: 119.11s | Avg batch: 0.121s | Throughput: 4226.9 img/s | CPU: 56.7% | RAM: 15.70GB (49.3%) | GPU: 14.0% | VRAM: 0.47/24.00 GB
+4GB experiments:  67%|█████████████████████████▎            | 100/150 [4:23:32<12:26:40, 896.01s/it]method: OpenCV, num_workers: 0, batch_size: 64, pin_memory: False
+Total: 137.03s | Avg batch: 0.017s | Throughput: 3673.9 img/s | CPU: 52.1% | RAM: 15.68GB (49.2%) | GPU: 13.0% | VRAM: 0.46/24.00 GB
+4GB experiments:  67%|██████████████████████████▎            | 101/150 [4:25:49<9:05:48, 668.34s/it]method: OpenCV, num_workers: 0, batch_size: 64, pin_memory: True
+Total: 146.95s | Avg batch: 0.019s | Throughput: 3425.9 img/s | CPU: 52.0% | RAM: 15.63GB (49.1%) | GPU: 13.0% | VRAM: 0.46/24.00 GB
+4GB experiments:  68%|██████████████████████████▌            | 102/150 [4:28:16<6:49:32, 511.93s/it]method: OpenCV, num_workers: 0, batch_size: 128, pin_memory: False
+Total: 136.57s | Avg batch: 0.035s | Throughput: 3686.3 img/s | CPU: 51.9% | RAM: 15.70GB (49.3%) | GPU: 13.0% | VRAM: 0.46/24.00 GB
+4GB experiments:  69%|██████████████████████████▊            | 103/150 [4:30:32<5:12:48, 399.34s/it]method: OpenCV, num_workers: 0, batch_size: 128, pin_memory: True
+Total: 146.64s | Avg batch: 0.037s | Throughput: 3433.3 img/s | CPU: 51.9% | RAM: 15.71GB (49.3%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  69%|███████████████████████████            | 104/150 [4:32:59<4:08:03, 323.55s/it]method: OpenCV, num_workers: 0, batch_size: 256, pin_memory: False
+Total: 136.97s | Avg batch: 0.070s | Throughput: 3675.6 img/s | CPU: 51.3% | RAM: 15.67GB (49.2%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  70%|███████████████████████████▎           | 105/150 [4:35:16<3:20:41, 267.59s/it]method: OpenCV, num_workers: 0, batch_size: 256, pin_memory: True
+Total: 145.42s | Avg batch: 0.074s | Throughput: 3462.0 img/s | CPU: 51.4% | RAM: 15.67GB (49.2%) | GPU: 1.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  71%|███████████████████████████▌           | 106/150 [4:37:41<2:49:21, 230.95s/it]method: OpenCV, num_workers: 0, batch_size: 384, pin_memory: False
+Total: 141.20s | Avg batch: 0.108s | Throughput: 3565.4 img/s | CPU: 51.4% | RAM: 15.66GB (49.2%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  71%|███████████████████████████▊           | 107/150 [4:40:03<2:26:13, 204.04s/it]method: OpenCV, num_workers: 0, batch_size: 384, pin_memory: True
+Total: 150.38s | Avg batch: 0.115s | Throughput: 3347.9 img/s | CPU: 52.0% | RAM: 15.67GB (49.2%) | GPU: 13.0% | VRAM: 0.48/24.00 GB
+4GB experiments:  72%|████████████████████████████           | 108/150 [4:42:33<2:11:34, 187.96s/it]method: OpenCV, num_workers: 0, batch_size: 512, pin_memory: False
+Total: 143.40s | Avg batch: 0.146s | Throughput: 3510.7 img/s | CPU: 52.2% | RAM: 15.63GB (49.1%) | GPU: 13.0% | VRAM: 0.48/24.00 GB
+4GB experiments:  73%|████████████████████████████▎          | 109/150 [4:44:57<1:59:18, 174.61s/it]method: OpenCV, num_workers: 0, batch_size: 512, pin_memory: True
+Total: 152.02s | Avg batch: 0.154s | Throughput: 3311.6 img/s | CPU: 52.2% | RAM: 15.65GB (49.1%) | GPU: 13.0% | VRAM: 0.48/24.00 GB
+4GB experiments:  73%|████████████████████████████▌          | 110/150 [4:47:29<1:51:53, 167.85s/it]method: OpenCV, num_workers: 2, batch_size: 64, pin_memory: False
+Total: 90.04s | Avg batch: 0.011s | Throughput: 5591.3 img/s | CPU: 21.8% | RAM: 15.68GB (49.2%) | GPU: 13.0% | VRAM: 0.49/24.00 GB
+4GB experiments:  74%|████████████████████████████▊          | 111/150 [4:48:59<1:33:56, 144.52s/it]method: OpenCV, num_workers: 2, batch_size: 64, pin_memory: True
+Total: 92.88s | Avg batch: 0.012s | Throughput: 5420.4 img/s | CPU: 23.7% | RAM: 15.66GB (49.2%) | GPU: 14.0% | VRAM: 0.49/24.00 GB
+4GB experiments:  75%|█████████████████████████████          | 112/150 [4:50:32<1:21:43, 129.04s/it]method: OpenCV, num_workers: 2, batch_size: 128, pin_memory: False
+Total: 90.08s | Avg batch: 0.023s | Throughput: 5588.8 img/s | CPU: 21.7% | RAM: 15.62GB (49.0%) | GPU: 1.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  75%|█████████████████████████████▍         | 113/150 [4:52:02<1:12:22, 117.37s/it]method: OpenCV, num_workers: 2, batch_size: 128, pin_memory: True
+Total: 91.97s | Avg batch: 0.023s | Throughput: 5473.8 img/s | CPU: 23.1% | RAM: 15.58GB (48.9%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  76%|█████████████████████████████▋         | 114/150 [4:53:34<1:05:51, 109.77s/it]method: OpenCV, num_workers: 2, batch_size: 256, pin_memory: False
+Total: 93.49s | Avg batch: 0.048s | Throughput: 5385.1 img/s | CPU: 22.1% | RAM: 15.38GB (48.3%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  77%|█████████████████████████████▉         | 115/150 [4:55:07<1:01:11, 104.90s/it]method: OpenCV, num_workers: 2, batch_size: 256, pin_memory: True
+Total: 93.67s | Avg batch: 0.048s | Throughput: 5374.9 img/s | CPU: 23.8% | RAM: 15.36GB (48.2%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  77%|███████████████████████████████▋         | 116/150 [4:56:41<57:32, 101.54s/it]method: OpenCV, num_workers: 2, batch_size: 384, pin_memory: False
+Total: 93.32s | Avg batch: 0.071s | Throughput: 5395.0 img/s | CPU: 22.2% | RAM: 15.40GB (48.3%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  78%|████████████████████████████████▊         | 117/150 [4:58:14<54:29, 99.09s/it]method: OpenCV, num_workers: 2, batch_size: 384, pin_memory: True
+Total: 94.62s | Avg batch: 0.072s | Throughput: 5320.6 img/s | CPU: 23.6% | RAM: 15.37GB (48.2%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  79%|█████████████████████████████████         | 118/150 [4:59:49<52:08, 97.77s/it]method: OpenCV, num_workers: 2, batch_size: 512, pin_memory: False
+Total: 91.97s | Avg batch: 0.093s | Throughput: 5473.8 img/s | CPU: 21.6% | RAM: 15.40GB (48.3%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  79%|█████████████████████████████████▎        | 119/150 [5:01:21<49:37, 96.04s/it]method: OpenCV, num_workers: 2, batch_size: 512, pin_memory: True
+Total: 92.69s | Avg batch: 0.094s | Throughput: 5431.4 img/s | CPU: 23.5% | RAM: 15.38GB (48.3%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  80%|█████████████████████████████████▌        | 120/150 [5:02:54<47:31, 95.05s/it]method: OpenCV, num_workers: 4, batch_size: 64, pin_memory: False
+Total: 63.20s | Avg batch: 0.008s | Throughput: 7966.0 img/s | CPU: 33.9% | RAM: 15.38GB (48.3%) | GPU: 1.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  81%|█████████████████████████████████▉        | 121/150 [5:03:57<41:19, 85.51s/it]method: OpenCV, num_workers: 4, batch_size: 64, pin_memory: True
+Total: 65.72s | Avg batch: 0.008s | Throughput: 7660.1 img/s | CPU: 37.1% | RAM: 15.38GB (48.3%) | GPU: 1.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  81%|██████████████████████████████████▏       | 122/150 [5:05:03<37:08, 79.59s/it]method: OpenCV, num_workers: 4, batch_size: 128, pin_memory: False
+Total: 62.65s | Avg batch: 0.016s | Throughput: 8036.0 img/s | CPU: 33.6% | RAM: 15.39GB (48.3%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  82%|██████████████████████████████████▍       | 123/150 [5:06:06<33:32, 74.52s/it]method: OpenCV, num_workers: 4, batch_size: 128, pin_memory: True
+Total: 67.03s | Avg batch: 0.017s | Throughput: 7510.5 img/s | CPU: 38.0% | RAM: 15.40GB (48.4%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  83%|██████████████████████████████████▋       | 124/150 [5:07:13<31:19, 72.29s/it]method: OpenCV, num_workers: 4, batch_size: 256, pin_memory: False
+Total: 64.89s | Avg batch: 0.033s | Throughput: 7758.7 img/s | CPU: 35.5% | RAM: 15.42GB (48.4%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  83%|███████████████████████████████████       | 125/150 [5:08:18<29:12, 70.08s/it]method: OpenCV, num_workers: 4, batch_size: 256, pin_memory: True
+Total: 67.75s | Avg batch: 0.034s | Throughput: 7430.4 img/s | CPU: 39.0% | RAM: 15.40GB (48.4%) | GPU: 1.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  84%|███████████████████████████████████▎      | 126/150 [5:09:25<27:45, 69.40s/it]method: OpenCV, num_workers: 4, batch_size: 384, pin_memory: False
+Total: 63.71s | Avg batch: 0.049s | Throughput: 7902.5 img/s | CPU: 35.6% | RAM: 15.41GB (48.4%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  85%|███████████████████████████████████▌      | 127/150 [5:10:29<25:57, 67.70s/it]method: OpenCV, num_workers: 4, batch_size: 384, pin_memory: True
+Total: 67.88s | Avg batch: 0.052s | Throughput: 7417.0 img/s | CPU: 38.6% | RAM: 15.39GB (48.3%) | GPU: 0.0% | VRAM: 0.28/24.00 GB
+4GB experiments:  85%|███████████████████████████████████▊      | 128/150 [5:11:37<24:51, 67.77s/it]method: OpenCV, num_workers: 4, batch_size: 512, pin_memory: False
+Total: 3885.79s | Avg batch: 3.949s | Throughput: 129.6 img/s | CPU: 25.3% | RAM: 15.65GB (49.1%) | GPU: 14.0% | VRAM: 0.48/24.00 GB
+4GB experiments:  86%|████████████████████████████████▋     | 129/150 [6:16:23<7:04:35, 1213.11s/it]method: OpenCV, num_workers: 4, batch_size: 512, pin_memory: True
+Total: 322.00s | Avg batch: 0.327s | Throughput: 1563.5 img/s | CPU: 28.3% | RAM: 15.85GB (49.8%) | GPU: 13.0% | VRAM: 0.51/24.00 GB
+4GB experiments:  87%|█████████████████████████████████▊     | 130/150 [6:21:45<5:15:15, 945.79s/it]method: OpenCV, num_workers: 8, batch_size: 64, pin_memory: False
+Total: 282.78s | Avg batch: 0.036s | Throughput: 1780.4 img/s | CPU: 48.2% | RAM: 15.68GB (49.2%) | GPU: 13.0% | VRAM: 0.50/24.00 GB
+4GB experiments:  87%|██████████████████████████████████     | 131/150 [6:26:28<3:56:31, 746.90s/it]method: OpenCV, num_workers: 8, batch_size: 64, pin_memory: True
+Total: 79.22s | Avg batch: 0.010s | Throughput: 6355.2 img/s | CPU: 35.3% | RAM: 15.67GB (49.2%) | GPU: 13.0% | VRAM: 0.50/24.00 GB
+4GB experiments:  88%|██████████████████████████████████▎    | 132/150 [6:27:47<2:43:59, 546.61s/it]method: OpenCV, num_workers: 8, batch_size: 128, pin_memory: False
+Total: 65.67s | Avg batch: 0.017s | Throughput: 7665.9 img/s | CPU: 43.2% | RAM: 15.56GB (48.8%) | GPU: 16.0% | VRAM: 0.50/24.00 GB
+4GB experiments:  89%|██████████████████████████████████▌    | 133/150 [6:28:53<1:53:59, 402.35s/it]method: OpenCV, num_workers: 8, batch_size: 128, pin_memory: True
+Total: 310.47s | Avg batch: 0.079s | Throughput: 1621.6 img/s | CPU: 49.6% | RAM: 15.59GB (48.9%) | GPU: 13.0% | VRAM: 0.51/24.00 GB
+4GB experiments:  89%|██████████████████████████████████▊    | 134/150 [6:34:03<1:39:56, 374.81s/it]method: OpenCV, num_workers: 8, batch_size: 256, pin_memory: False
+Total: 93.18s | Avg batch: 0.047s | Throughput: 5402.7 img/s | CPU: 44.3% | RAM: 15.47GB (48.6%) | GPU: 14.0% | VRAM: 0.50/24.00 GB
+4GB experiments:  90%|███████████████████████████████████    | 135/150 [6:35:36<1:12:35, 290.33s/it]method: OpenCV, num_workers: 8, batch_size: 256, pin_memory: True
+Total: 86.49s | Avg batch: 0.044s | Throughput: 5820.9 img/s | CPU: 44.8% | RAM: 15.44GB (48.5%) | GPU: 13.0% | VRAM: 0.50/24.00 GB
+4GB experiments:  91%|█████████████████████████████████████▏   | 136/150 [6:37:03<53:28, 229.20s/it]method: OpenCV, num_workers: 8, batch_size: 384, pin_memory: False
+Total: 68.55s | Avg batch: 0.052s | Throughput: 7344.3 img/s | CPU: 46.7% | RAM: 15.47GB (48.6%) | GPU: 13.0% | VRAM: 0.50/24.00 GB
+4GB experiments:  91%|█████████████████████████████████████▍   | 137/150 [6:38:11<39:13, 181.02s/it]method: OpenCV, num_workers: 8, batch_size: 384, pin_memory: True
+Total: 85.91s | Avg batch: 0.065s | Throughput: 5860.4 img/s | CPU: 43.7% | RAM: 15.21GB (47.7%) | GPU: 14.0% | VRAM: 0.50/24.00 GB
+4GB experiments:  92%|█████████████████████████████████████▋   | 138/150 [6:39:37<30:30, 152.50s/it]method: OpenCV, num_workers: 8, batch_size: 512, pin_memory: False
+Total: 66.44s | Avg batch: 0.068s | Throughput: 7577.9 img/s | CPU: 42.2% | RAM: 15.25GB (47.9%) | GPU: 13.0% | VRAM: 0.50/24.00 GB
+4GB experiments:  93%|█████████████████████████████████████▉   | 139/150 [6:40:44<23:13, 126.70s/it]method: OpenCV, num_workers: 8, batch_size: 512, pin_memory: True
+Total: 85.52s | Avg batch: 0.087s | Throughput: 5886.9 img/s | CPU: 41.8% | RAM: 15.24GB (47.8%) | GPU: 14.0% | VRAM: 0.50/24.00 GB
+4GB experiments:  93%|██████████████████████████████████████▎  | 140/150 [6:42:09<19:03, 114.36s/it]method: OpenCV, num_workers: 12, batch_size: 64, pin_memory: False
+Total: 81.93s | Avg batch: 0.010s | Throughput: 6145.1 img/s | CPU: 47.6% | RAM: 15.96GB (50.1%) | GPU: 14.0% | VRAM: 0.50/24.00 GB
+4GB experiments:  94%|██████████████████████████████████████▌  | 141/150 [6:43:31<15:41, 104.65s/it]method: OpenCV, num_workers: 12, batch_size: 64, pin_memory: True
+Total: 99.21s | Avg batch: 0.013s | Throughput: 5074.3 img/s | CPU: 35.1% | RAM: 15.78GB (49.5%) | GPU: 14.0% | VRAM: 0.51/24.00 GB
+4GB experiments:  95%|██████████████████████████████████████▊  | 142/150 [6:45:11<13:44, 103.03s/it]method: OpenCV, num_workers: 12, batch_size: 128, pin_memory: False
+Total: 84.64s | Avg batch: 0.022s | Throughput: 5948.0 img/s | CPU: 51.0% | RAM: 15.90GB (49.9%) | GPU: 7.0% | VRAM: 0.51/24.00 GB
+4GB experiments:  95%|████████████████████████████████████████  | 143/150 [6:46:35<11:22, 97.53s/it]method: OpenCV, num_workers: 12, batch_size: 128, pin_memory: True
+Total: 104.16s | Avg batch: 0.026s | Throughput: 4833.3 img/s | CPU: 40.1% | RAM: 15.92GB (50.0%) | GPU: 25.0% | VRAM: 0.51/24.00 GB
+4GB experiments:  96%|████████████████████████████████████████▎ | 144/150 [6:48:20<09:57, 99.54s/it]method: OpenCV, num_workers: 12, batch_size: 256, pin_memory: False
+Total: 82.01s | Avg batch: 0.042s | Throughput: 6138.6 img/s | CPU: 49.5% | RAM: 15.87GB (49.8%) | GPU: 13.0% | VRAM: 0.50/24.00 GB
+4GB experiments:  97%|████████████████████████████████████████▌ | 145/150 [6:49:42<07:51, 94.30s/it]method: OpenCV, num_workers: 12, batch_size: 256, pin_memory: True
+Total: 100.93s | Avg batch: 0.051s | Throughput: 4988.1 img/s | CPU: 37.6% | RAM: 15.79GB (49.6%) | GPU: 14.0% | VRAM: 0.51/24.00 GB
+4GB experiments:  97%|████████████████████████████████████████▉ | 146/150 [6:51:23<06:25, 96.31s/it]method: OpenCV, num_workers: 12, batch_size: 384, pin_memory: False
+Total: 84.78s | Avg batch: 0.065s | Throughput: 5938.6 img/s | CPU: 51.4% | RAM: 15.88GB (49.8%) | GPU: 14.0% | VRAM: 0.51/24.00 GB
+4GB experiments:  98%|█████████████████████████████████████████▏| 147/150 [6:52:48<04:38, 92.86s/it]method: OpenCV, num_workers: 12, batch_size: 384, pin_memory: True
+Total: 100.71s | Avg batch: 0.077s | Throughput: 4998.8 img/s | CPU: 37.8% | RAM: 15.89GB (49.9%) | GPU: 1.0% | VRAM: 0.52/24.00 GB
+4GB experiments:  99%|█████████████████████████████████████████▍| 148/150 [6:54:28<03:10, 95.23s/it]method: OpenCV, num_workers: 12, batch_size: 512, pin_memory: False
+Total: 81.96s | Avg batch: 0.083s | Throughput: 6142.7 img/s | CPU: 49.7% | RAM: 16.10GB (50.5%) | GPU: 14.0% | VRAM: 0.51/24.00 GB
+4GB experiments:  99%|█████████████████████████████████████████▋| 149/150 [6:55:50<01:31, 91.27s/it]method: OpenCV, num_workers: 12, batch_size: 512, pin_memory: True
+Total: 100.95s | Avg batch: 0.103s | Throughput: 4987.2 img/s | CPU: 37.9% | RAM: 15.33GB (48.1%) | GPU: 15.0% | VRAM: 0.51/24.00 GB
+4GB experiments: 100%|█████████████████████████████████████████| 150/150 [6:57:31<00:00, 167.01s/it]
