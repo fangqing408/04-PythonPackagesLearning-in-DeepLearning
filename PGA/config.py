@@ -1,11 +1,16 @@
 import torch
-import torchvision.transforms as T
+from torchvision import transforms as T
 
 class Config:
-    backbone = 'resnet153' # [timm]
-    metric = 'arcface' # ['arcface', 'cosface]
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    batch_size = 256
+    overlap_ratio = 0.4
+    warmup_epochs = 10
+    total_epochs = 10
+    learning_rate = 1e-4
     embedding_size = 512
     input_shape = [1, 128, 128]
+
     train_transform = T.Compose([ 
         T.Grayscale(num_output_channels=1),
         T.RandomHorizontalFlip(p=0.5),
@@ -23,23 +28,5 @@ class Config:
         T.Normalize(mean=[0.5], std=[0.5])
     ])
     train_root = "./mnist_train_torch"
-    test_root = "./mnist_test_torch"
-    test_list = "./lfw_test_pair.txt"
-    checkpoints = "checkpoints"
-    test_model = "checkpoints/0.pth"
-    train_batch_size = 256
-    test_batch_size = 1
-    epochs = 10
-    optimizer = "sgd" # ['sgd', 'adam']
-    lr = 1e-1
-    lr_step = 10
-    lr_decay = 0.95
-    weight_decay = 5e-4
-    loss = "focal_loss" # ['focal_loss', 'cross_entropy']
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    pin_memory = True
-    num_workers = 4
+
 config = Config()
-
-
-    

@@ -158,7 +158,7 @@ def main():
     for subset_gb in subset_sizes:
         print(f"\n================ Testing subset: {subset_gb} GB ================")
         files = get_file_subset(img_dir, subset_gb)
-        # warmup_time = warmup_cache(files)
+        warmup_time = warmup_cache(files)
 
         results = []
         total_exps = len(methods) * len(num_workers_list) * len(batch_sizes) * len(pin_memory_list)
@@ -192,6 +192,13 @@ def main():
 
 
 if __name__ == "__main__":
-    # 最安全设置：防止 Windows 多进程递归死锁
+    import multiprocessing
+    multiprocessing.freeze_support()
     torch.multiprocessing.set_start_method("spawn", force=True)
+
+    try:
+        _ = GPUtil.getGPUs()
+    except Exception:
+        GPUtil.getGPUs = lambda: []
+
     main()

@@ -2,11 +2,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from config import config
-
 # ======================================================
 # ==================== 基础函数区 ======================
 # ======================================================
-
 def pairwise_cosine(x, eps=1e-8): # 计算样本两两之间的余弦相似度矩阵
     x = F.normalize(x, dim=-1) # [B, D]
     sim = x @ x.t()
@@ -14,11 +12,11 @@ def pairwise_cosine(x, eps=1e-8): # 计算样本两两之间的余弦相似度�
 
 def _knn_mask(sim, base_mask, k): # 选取 top-k 相似的邻居，sim 是相似度矩阵，base_mask 1 代表允许成为侯选边，0 代表不允许成为侯选边
     B = sim.size(0) # B 也就是 Batch 的大小
-    # 注意 B 设置的不要过小，至少应该大于 topk
+    # 注意 Batch 设置的不要过小，至少应该大于 topk
     sim_no_diag = sim - torch.eye(B, device=config.device) * 1e9 # 去掉自环，不许把自己选成自己的邻居，对角线上减去了一个极大的数字，后续 topk 不会选到他
     # 保持 device 一致，防止 cpu 和 cuda 混用出现问题，因为相似度可能出现负值所以这里要置为一个极小值
     masked = sim_no_diag * base_mask - (1.0 - base_mask) * 1e9 # 把不允许成为侯选边的设置为极小值，不会被 topk 取到
-    k = min(k, max(B - 1, 1)) # 这里 B 最好大于 topk，但是还是加上了 max 防止报错
+    k = min(k, max(B - 1, 1)) # 这里 Batch 最好大于 topk，但是还是加上了 max 防止报错
     idx = torch.topk(masked, k=k, dim=1).indices # 每个维度从大到小取出前 k 个数，返回这 k 个数和他们的索引，一般用二元组承接，可以 .indices 只要索引
     m = torch.zeros_like(sim)
     m.scatter_(1, idx, 1.0) # dim, idx, value，在 dim 维度上，将  idx 指定的位置置为 value
@@ -59,10 +57,8 @@ def build_idea(labels, sigma_in=0.98, sigma_out=0.03):
     A = same * sigma_in + diff * sigma_out
     A = torch.maximum(A, torch.eye(A.size(0), device=config.device))  # 保证对角线为1
     return normalize_sym(A)
-
-
 # ======================================================
-# ==================== GCN 模块 =======================
+# =====================GCN 模块=========================
 # ======================================================
 class GAM(nn.Module):
     def __init__(self, dim=512):
@@ -77,14 +73,11 @@ class GAM(nn.Module):
         Z = F.relu(self.bn(Z))
         Z = A_norm @ self.fc2(Z)
         return Z + X  # 残差结构
-
-
 # ======================================================
-# ==================== PGA 主结构 =======================
+# =====================PGA 主结构=======================
 # ======================================================
 class PGAHead(nn.Module):
-    def __init__(self, num_layers, topk=64, t_diff=2,
-                 use_ema_target=True, ema_m=0.9):
+    def __init__(self, num_layers, topk=64, t_diff=2, use_ema_target=True, ema_m=0.9):
         super().__init__()
         self.gams = nn.ModuleList([GAM(512) for _ in range(num_layers)])
         self.topk = topk
@@ -95,26 +88,24 @@ class PGAHead(nn.Module):
         self.beta_sched  = torch.linspace(1.00, 0.80, steps=num_layers).tolist()
 
         # EMA 缓冲区（更稳的目标结构）
-        # 我们不直接拿当前的 batch 算出来的 K 对齐，而是对他做一个平滑，
-        self.use_ema_target = use_ema_target
-        self.ema_m = ema_m
-        self.register_buffer("initialized", torch.tensor(0))  # 初始化标志
+        # 我们不直接拿当前的 batch 算出来的 K 对齐，而是对他做一个平滑
+        self.use_ema_target = use_ema_target # 是否启用 EMA 平滑，方便打开和关闭
+        self.ema_m = ema_m # 平滑系数
+        self.register_buffer("initialized", torch.tensor(0))  # 初始化标志，初始化代表没建立平均图
         self._ema_K = nn.ParameterList([
-            nn.Parameter(torch.zeros(1, 1), requires_grad=False)
+            nn.Parameter(torch.zeros(1, 1), requires_grad=False) # 存放每层的平均图结构，保证张量随着设备移动，占位符 (1, 1) 代表还没拿到真实的 K
+            # requires_grad 表示这些不是可学习的参数只是简单的缓存
             for _ in range(num_layers)
-        ])
+        ]) # 初始化了 EMA 的占位符等信息，现在还没开始真正的存储平滑图
 
         # 投影层，将每层 Z 投影到统一 768 维空间以进行语义对齐
         self.proj = nn.Linear(512, 768, bias=False)
 
-    # ---------------- α / β 设定与读取 ----------------
-    def set_alpha_beta(self, alpha, beta):
-        """支持外部手动设置 α/β 调度表"""
+    def set_alpha_beta(self, alpha, beta): # 可以在外面调整调度表
         self.alpha_sched = alpha
         self.beta_sched = beta
 
     def _get_alpha_beta(self, layer_idx):
-        """按层读取 α/β（列表或标量均可）"""
         def pick(val):
             if isinstance(val, (list, tuple)):
                 return torch.as_tensor(val[layer_idx], device=config.device, dtype=torch.float32)
@@ -125,7 +116,6 @@ class PGAHead(nn.Module):
         b = torch.clamp(pick(self.beta_sched),  min=0.0)
         return a, b
 
-    # ---------------- 构图部分 ----------------
     def _graph(self, F512, y, a, b):
         S = pairwise_cosine(F512) # 计算余弦相似度
         A_intra, A_inter = build_intra_inter(S, y, topk=self.topk) # 构建类内类间图
@@ -135,70 +125,45 @@ class PGAHead(nn.Module):
         K = diffusion_kernel(A_norm, t=self.t_diff) # 传播扩散核
         return A_norm, K
 
-    # ---------------- EMA 初始化 ----------------
     def _init_ema_if_needed(self, K_list):
-        """第一次 forward 时建立 EMA 缓冲区"""
-        if int(self.initialized.item()) == 1:
-            return
-        with torch.no_grad():
+        if int(self.initialized.item()) == 1: return # 开始跑到 时候创建副本，后续不再进行更改
+        with torch.no_grad(): # 不记录梯度，因为只是简单的复制数据
             for i, K in enumerate(K_list):
-                self._ema_K[i] = nn.Parameter(K.detach().clone(),
-                                              requires_grad=False)
+                self._ema_K[i] = nn.Parameter(K.detach().clone(), requires_grad=False) # 遍历每层的真实图 K 从计算图里面分离并复制一份不会参与反向传播，存储值副本
             self.initialized.fill_(1)
 
-    # ---------------- 前向传播 ----------------
-    def forward(self, feats_512_list, labels,
-                lambda_align_K=0.5, lambda_align_Z=1.0, lambda_idea=1.0,
-                sigma_in=0.98, sigma_out=0.03,
-                stopgrad=True, return_graph=False):
-        """
-        feats_512_list : 每层 [B,512] 特征
-        labels         : [B] 类别标签
-        lambda_align_K : 层间结构对齐损失权重
-        lambda_align_Z : 层间语义对齐损失权重
-        lambda_idea    : 最后一层理想图对齐损失权重
-        """
-        assert len(feats_512_list) == len(self.gams)
-        L = len(feats_512_list)
+    def forward(self, feats_final, labels, lambda_align_K=0.5, lambda_align_Z=0.5, lambda_idea=1.0, sigma_in=0.98, sigma_out=0.03, stopgrad=True):
+        L = len(feats_final)
 
-        # 1) 每层构图 + GCN
         A_list, K_list, Z_list = [], [], []
-        for i, (F512, gam) in enumerate(zip(feats_512_list, self.gams)):
-            a_i, b_i = self._get_alpha_beta(i, config.device) # 取出来参数
+        for i, (F512, gam) in enumerate(zip(feats_final, self.gams)):
+            a_i, b_i = self._get_alpha_beta(i) # 取出来参数
             Ai, Ki = self._graph(F512, labels, a_i, b_i) # 计算扩散核和原始核
             Zi = gam(Ai, F512) # 扩散核计算 GCN 融合邻居信息
             A_list.append(Ai); K_list.append(Ki); Z_list.append(Zi) 
 
-        # 2) EMA 目标（可选），更稳的 stop-grad
         if self.use_ema_target:
             self._init_ema_if_needed(K_list)
             with torch.no_grad():
                 for i in range(L):
-                    self._ema_K[i].data.mul_(self.ema_m).add_(
-                        K_list[i].detach() * (1.0 - self.ema_m)
-                    )
+                    self._ema_K[i].data.mul_(self.ema_m).add_(K_list[i].detach() * (1.0 - self.ema_m)) # 这个只是 detach 就行只是用了一下，没有修改 K 的值
 
-        # 3) 逐层定向对齐：|| K_{i-1} - sg[K_i] ||^2 和 || Z_{i-1} - sg[Z_i] ||^2
+        # 逐层定向对齐：|| K_{i-1} - sg[K_i] ||^2 和 || Z_{i-1} - sg[Z_i] ||^2
         loss_align_K = torch.zeros((), device=config.device)
         loss_align_Z = torch.zeros((), device=config.device)
         for i in range(1, L):
-            # ---- 结构对齐 ----
             Ki_prev = K_list[i - 1]
-            Ki_tgt  = self._ema_K[i].detach() if self.use_ema_target else \
-                      (K_list[i].detach() if stopgrad else K_list[i])
+            Ki_tgt  = self._ema_K[i].detach() if self.use_ema_target else (K_list[i].detach() if stopgrad else K_list[i])
             loss_align_K = loss_align_K + (Ki_prev - Ki_tgt).pow(2).mean()
 
-            # ---- 语义对齐（Z投影到768维）----
             Zi_prev = F.normalize(self.proj(Z_list[i - 1]), dim=-1)
             Zi_curr = F.normalize(self.proj(Z_list[i]), dim=-1)
             loss_align_Z = loss_align_Z + (Zi_prev - Zi_curr.detach()).pow(2).mean()
 
-        # 4) 末层锚点：K_out 对齐 K_idea（不需要 ArcFace 公式）
         K_out  = K_list[-1]
         K_idea = build_idea(labels, sigma_in=sigma_in, sigma_out=sigma_out).to(config.device)
         loss_idea = (K_out - K_idea).pow(2).mean()
 
-        # 5) 汇总损失
         losses = {
             "loss_align_K": loss_align_K,
             "loss_align_Z": loss_align_Z,
@@ -207,8 +172,4 @@ class PGAHead(nn.Module):
                           lambda_align_Z * loss_align_Z +
                           lambda_idea * loss_idea
         }
-
-        if return_graph:
-            return Z_list, losses, {"A": A_list, "K": K_list}
-        else:
-            return Z_list, losses
+        return losses
