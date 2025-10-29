@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import Dataset, Sampler, DataLoader
 from PIL import Image
 import os
+import random
 
 class OverlapDataset(Dataset):
     def __init__(self, root, transform=None):
@@ -27,20 +28,28 @@ class OverlapDataset(Dataset):
         return img, label
 
 class OverlapSampler(Sampler):
-    def __init__(self, data, batch_size, overlap_ratio=0.4):
+    def __init__(self, data, batch_size, overlap_ratio=0.4, shuffle=True):
         self.data = data
         self.batch_size = batch_size
+        self.overlap_ratio = overlap_ratio
         self.step = int(batch_size * (1 - overlap_ratio))
+        self.shuffle = shuffle
         self.indices = [
             list(range(i, i + batch_size))
             for i in range(0, len(data) - batch_size + 1, self.step)
         ]
     def __iter__(self):
-        for idxs in self.indices:
-            yield idxs
+        indices = list(range(len(self.data)))
+        if self.shuffle: random.shuffle(indices)
+        for i in range(0, len(self.data) - self.batch_size + 1, self.step):
+            batch_idxs = indices[i:i + self.batch_size]
+            yield batch_idxs
     def __len__(self):
-        return len(self.indices)
-    
+        return (len(self.data) - self.batch_size) // self.step + 1
+
+# ======================================================
+# ===============验证数据集的创建情况====================
+# ======================================================
 if __name__ == "__main__":
     images = torch.randn(100, 3, 224, 224)
     labels = torch.randint(0, 10, (100, ))

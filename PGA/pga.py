@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from config import config
+
 # ======================================================
 # ==================== 基础函数区 ======================
 # ======================================================
@@ -23,7 +24,7 @@ def _knn_mask(sim, base_mask, k): # 选取 top-k 相似的邻居，sim 是相似
     m = torch.maximum(m, m.t())  # 因为选取前 k 个可能得到的矩阵的单向边，这里将其变为对称矩阵
     return m
 
-def build_intra_inter(sim, y, topk=64): # 构建类内类间图邻接，暂时把 topk 置为 64，Batch_size 置为 256
+def build_intra_inter(sim, y, topk=8): # 构建类内类间图邻接，暂时把 topk 置为 64，Batch_size 置为 256
     # sim: [B,B], y: [B]
     same = (y.unsqueeze(0) == y.unsqueeze(1)).float() # 构建同类集合
     diff = 1.0 - same # 构建同类集合的补集
@@ -40,7 +41,7 @@ def normalize_sym(A, eps=1e-8): # 做图的对称归一化，节点的度越大�
     Dinv = torch.diag(torch.pow(d, -0.5)) # 度矩阵的 -1/2 次方转为对角阵
     return Dinv @ A @ Dinv # 计算最终的结果
 
-def diffusion_kernel(A_norm, t=2):
+def diffusion_kernel(A_norm, t=1):
     # 和邻居信息进行融合，此时每个节点的影响范围是一跳的邻居，每循环一次就在图上多传播一层
     # 这个是先计算相似度矩阵的连乘，最后乘在节点矩阵上面进行特征的融合
     K = A_norm
@@ -48,14 +49,15 @@ def diffusion_kernel(A_norm, t=2):
         K = K @ A_norm
     return K
 
-def build_idea(labels, sigma_in=0.98, sigma_out=0.03):
+# 我们希望我们的相似性矩阵逼近一个理想矩阵，也就是下面构造的 Gidea，其实最理想的就是同类为 1，异类为 0，这里加上了一点点的平滑
+def build_idea(labels, sigma_in=0.99, sigma_out=0.01):
     # 生成固定的理想图（仅用于最后一层对齐）
     same = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()  # [B,B]
     diff = 1.0 - same
     # 类内 > 1 放大相似度（更紧）
     # 类间 < 1 削弱相似度（更远）
     A = same * sigma_in + diff * sigma_out
-    A = torch.maximum(A, torch.eye(A.size(0), device=config.device))  # 保证对角线为1
+    A = torch.maximum(A, torch.eye(A.size(0), device=config.device))
     return normalize_sym(A)
 # ======================================================
 # =====================GCN 模块=========================
@@ -73,11 +75,12 @@ class GAM(nn.Module):
         Z = F.relu(self.bn(Z))
         Z = A_norm @ self.fc2(Z)
         return Z + X  # 残差结构
+
 # ======================================================
 # =====================PGA 主结构=======================
 # ======================================================
 class PGAHead(nn.Module):
-    def __init__(self, num_layers, topk=64, t_diff=2, use_ema_target=True, ema_m=0.9):
+    def __init__(self, num_layers, topk=8, t_diff=1, use_ema_target=True, ema_m=0.9):
         super().__init__()
         self.gams = nn.ModuleList([GAM(512) for _ in range(num_layers)])
         self.topk = topk
@@ -85,7 +88,7 @@ class PGAHead(nn.Module):
 
         # α, β 可为标量或每层独立的 list/张量（默认类内↑类间↓）
         self.alpha_sched = torch.linspace(1.00, 1.20, steps=num_layers).tolist()
-        self.beta_sched  = torch.linspace(1.00, 0.80, steps=num_layers).tolist()
+        self.beta_sched  = torch.linspace(0.00, 0.00, steps=num_layers).tolist()
 
         # EMA 缓冲区（更稳的目标结构）
         # 我们不直接拿当前的 batch 算出来的 K 对齐，而是对他做一个平滑
@@ -131,8 +134,8 @@ class PGAHead(nn.Module):
             for i, K in enumerate(K_list):
                 self._ema_K[i] = nn.Parameter(K.detach().clone(), requires_grad=False) # 遍历每层的真实图 K 从计算图里面分离并复制一份不会参与反向传播，存储值副本
             self.initialized.fill_(1)
-
-    def forward(self, feats_final, labels, lambda_align_K=0.5, lambda_align_Z=0.5, lambda_idea=1.0, sigma_in=0.98, sigma_out=0.03, stopgrad=True):
+    
+    def forward(self, feats_final, labels, lambda_align_K=128, lambda_align_Z=64, lambda_idea=1.0, sigma_in=0.99, sigma_out=0.01, stopgrad=True):
         L = len(feats_final)
 
         A_list, K_list, Z_list = [], [], []

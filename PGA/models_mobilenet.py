@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+
 # ======================================================
 # ====================基础模块==========================
 # ======================================================
@@ -71,22 +72,22 @@ class MobileNet(nn.Module):
 
         self.backbone1 = nn.Sequential(
             DepthWiseRes(64, 64, stride=1),
-            DepthWiseRes(64, 64, stride=1)
+            MultiDepthWiseRes(num_block=2, channels=64)
         )
         
         self.backbone2 = nn.Sequential(
             DepthWiseRes(64, 128, stride=2),
-            MultiDepthWiseRes(num_block=2, channels=128)
+            MultiDepthWiseRes(num_block=4, channels=128)
         )
 
         self.backbone3 = nn.Sequential(
             DepthWiseRes(128, 128, stride=1),
-            MultiDepthWiseRes(num_block=3, channels=128)
+            MultiDepthWiseRes(num_block=4, channels=128)
         )
 
         self.backbone4 = nn.Sequential(
             DepthWiseRes(128, 256, stride=2),
-            MultiDepthWiseRes(num_block=3, channels=256)
+            MultiDepthWiseRes(num_block=2, channels=256)
         )
 
         self.backbone5 = nn.Sequential(
@@ -128,5 +129,4 @@ class MobileNet(nn.Module):
         x = self.backbone5(x)
         feats.append(self.proj[4](x))
 
-        emb = self.bn(self.fc(feats[-1]))
-        return feats, emb
+        return feats
