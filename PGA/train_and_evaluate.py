@@ -3,9 +3,13 @@ import torch.nn.functional as F
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 import math
+from config import config
+from PIL import Image
+import numpy as np
+import os
 
 @torch.no_grad()
-def evaluate(model_backbone, head, pga, val_loader, device, epoch, warmup_epochs):
+def evaluate(model_backbone, head, pga, val_loader, device):
     model_backbone.eval()
     head.eval()
     pga.eval()
@@ -27,6 +31,48 @@ def evaluate(model_backbone, head, pga, val_loader, device, epoch, warmup_epochs
 
     return total_loss / len(val_loader), correct / total
 
+@torch.no_grad()
+def evaluate_lfw(model_backbone, pga, device, pair_file=config.test_root_lfw_pair, img_root=config.test_root_lfw):
+    model_backbone.eval()
+    pga.eval()
+
+    # 缓存所有图片特征
+    feat_cache = {}
+
+    def get_feat(img_path):
+        if img_path in feat_cache:
+            return feat_cache[img_path]
+        img = Image.open(img_path).convert("L")
+        img = config.test_transform(img).unsqueeze(dim=0).to(device)
+        feats_final = model_backbone(img)
+        feat = F.normalize(feats_final[-1], dim=1)
+        feat_cache[img_path] = feat.cpu()
+        return feat_cache[img_path]
+
+    sims, labels = [], []
+
+    with open(pair_file, "r") as f:
+        lines = [x.strip().split() for x in f.readlines() if x.strip()]
+
+    for path1, path2, lab in lines:
+        img1 = os.path.join(img_root, path1)
+        img2 = os.path.join(img_root, path2)
+
+        f1 = get_feat(img1)
+        f2 = get_feat(img2)
+        sim = F.cosine_similarity(f1, f2).item()
+        sims.append(sim)
+        labels.append(int(lab))
+
+
+    sims = np.array(sims)
+    labels = np.array(labels)
+
+    thresholds = np.linspace(0, 1, 50)
+    accs = [(thr, ((sims > thr) == labels).mean()) for thr in thresholds]
+    best_thr, best_acc = max(accs, key=lambda x: x[1])
+    return best_acc, best_thr
+
 
 def lambda_cosine(start, end, epoch, total_epochs, warmup_epochs):
     if epoch < warmup_epochs:
@@ -37,12 +83,12 @@ def lambda_cosine(start, end, epoch, total_epochs, warmup_epochs):
     p = max(0.0, min(p, 1.0))
     return end - (end - start) * (math.cos(math.pi * p) + 1.0) / 2.0
 
-def train(name, model_backbone, head, pga, loader, val_loader, optimizer, scheduler, device, warmup_epochs=5, total_epochs=40, lambda_K=64, lambda_Z=32, lambda_idea=1.0):
+def train(name, model_backbone, head, pga, loader, val_loader, optimizer, scheduler, device, warmup_epochs=10, total_epochs=100, lambda_K=64, lambda_Z=16):
     writer = SummaryWriter(log_dir=name)
     model_backbone.train()
     head.train()
     pga.train()
-
+    iters = 0
     for epoch in range(total_epochs):
         pbar = tqdm(loader, desc=f"[epoch {epoch}/{total_epochs - 1}]")
         total_cls_loss = 0.0
@@ -58,7 +104,7 @@ def train(name, model_backbone, head, pga, loader, val_loader, optimizer, schedu
             feats_final = model_backbone(imgs)
 
             if epoch >= warmup_epochs:
-                losses = pga(feats_final, labels, lambda_align_K=lambda_align_K, lambda_align_Z=lambda_align_Z, lambda_idea=lambda_idea)
+                losses = pga(feats_final, labels, lambda_align_K=lambda_align_K, lambda_align_Z=lambda_align_Z)
                 loss_pga = losses["loss_pga"]
                 logits = head(feats_final[-1])
             else: 
@@ -81,24 +127,42 @@ def train(name, model_backbone, head, pga, loader, val_loader, optimizer, schedu
                 "pga": f"{loss_pga.item():.4f}"
             })
 
-        val_avg_loss, val_acc = evaluate(model_backbone, head, pga, val_loader, device, epoch, warmup_epochs)
+            if iters % 1500 == 0:
+                best_acc, best_thr = evaluate_lfw(model_backbone=model_backbone, pga=pga, device=device)
+
+                avg_cls = total_cls_loss / len(loader)
+                avg_pga = total_pga_loss / len(loader)
+
+                writer.add_scalars("Loss/train", {
+                    "cls": avg_cls,
+                    "pga": avg_pga,
+                    # "val": val_avg_loss
+                }, iters)
+                writer.add_scalar("Acc/val", best_acc, iters)
+
+            iters = iters + 1
+        # val_avg_loss, val_acc = evaluate(model_backbone, head, pga, val_loader, device)
+        best_acc, best_thr = evaluate_lfw(model_backbone=model_backbone, pga=pga, device=device)
 
         avg_cls = total_cls_loss / len(loader)
         avg_pga = total_pga_loss / len(loader)
 
-        writer.add_scalars("Loss/train", {
-            "cls": avg_cls,
-            "pga": avg_pga,
-            "val": val_avg_loss
-        }, epoch)
-
-        writer.add_scalar("Acc/val", val_acc, epoch)
+        # writer.add_scalars("Loss/train", {
+        #     "cls": avg_cls,
+        #     "pga": avg_pga,
+        #     # "val": val_avg_loss
+        # }, epoch)
+        # writer.add_scalar("Acc/val", val_acc, epoch)
 
         lr = optimizer.param_groups[0]["lr"]
         lr_pga = optimizer.param_groups[2]["lr"]
+        # print(
+        #     f"epoch {epoch:03d} | cls={avg_cls:.4f} | pga={avg_pga:.4f} | val_loss={val_avg_loss:.4f} | "
+        #     f"lr={lr:.8f} | lr_pga={lr_pga:.8f} | val_acc={val_acc * 100:.2f}% | lambda_align_K={lambda_align_K:.4f} | lambda_align_Z={lambda_align_Z:.4f}"
+        # )
         print(
-            f"epoch {epoch:03d} | cls={avg_cls:.4f} | pga={avg_pga:.4f} | val_loss={val_avg_loss:.4f} | "
-            f"lr={lr:.8f} | lr_pga={lr_pga:.8f} | val_acc={val_acc * 100:.2f}% | lambda_align_K={lambda_align_K:.4f} | lambda_align_Z={lambda_align_Z:.4f}"
+            f"epoch {epoch:03d} | cls={avg_cls:.4f} | pga={avg_pga:.4f} | best_thr: {best_thr:.3f} | best_acc: {best_acc*100:.2f}% | "
+            f"lr={lr:.8f} | lr_pga={lr_pga:.8f} | lambda_align_K={lambda_align_K:.4f} | lambda_align_Z={lambda_align_Z:.4f}"
         )
         ckpt = {
             "epoch": epoch,

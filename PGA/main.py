@@ -12,7 +12,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class CosineClassifier(nn.Module):
-    def __init__(self, in_dim=512, num_classes=10, scale=30.0):
+    def __init__(self, in_dim=512, num_classes=10, scale=32.0):
         super().__init__()
         self.weight = nn.Parameter(torch.randn(num_classes, in_dim))
         nn.init.xavier_normal_(self.weight)
@@ -24,12 +24,12 @@ class CosineClassifier(nn.Module):
 
         return self.scale * (x @ w.t())
 
-def reset_all():
+def reset_all(num_classes):
     torch.cuda.empty_cache()
     # 重新初始化所有对象
     backbone = MobileNetWithPGA(embedding_size=512).to(config.device)
     # softmax_head = nn.Linear(512, num_classes).to(config.device) # pga 是必须的，其他的方法需要和他进行比较
-    softmax_head = CosineClassifier(in_dim=512, num_classes=10, scale=30.0).to(config.device)
+    softmax_head = CosineClassifier(in_dim=512, num_classes=num_classes, scale=32.0).to(config.device)
     # arcface_head = ArcFaceHead(in_features=512, out_features=num_classes).to(config.device) # 暂时先不对 arcface 分类头进行训练，先对比最基础的 softmax 分类头
     pga = PGAHead(num_layers=5).to(config.device)
 
@@ -61,10 +61,10 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, num_workers=4, pin_memory=True, shuffle=True, drop_last=True)
     num_classes = dataset.num_classes
 
-    backbone, softmax_head, pga, optimizer, scheduler = reset_all()
+    backbone, softmax_head, pga, optimizer, scheduler = reset_all(num_classes=num_classes)
 
     train(
-        name="./log/pga_randomsampler_real",
+        name="./webface_softmax_pga_log/softmax_v1",
         model_backbone=backbone,
         head=softmax_head,
         pga=pga,
@@ -76,6 +76,5 @@ if __name__ == "__main__":
         warmup_epochs=config.warmup_epochs,
         total_epochs=config.total_epochs,
         lambda_K=64,
-        lambda_Z=16,
-        lambda_idea=1.0
+        lambda_Z=16
     )

@@ -18,4 +18,6 @@ mnist_train_torch
 lmdb
 checkpoints
 log
+softmax_pga_log
+arcface_pga_log
 CASIA-WebFace-Expanded

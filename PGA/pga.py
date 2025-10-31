@@ -50,15 +50,14 @@ def diffusion_kernel(A_norm, t=1):
     return K
 
 # 我们希望我们的相似性矩阵逼近一个理想矩阵，也就是下面构造的 Gidea，其实最理想的就是同类为 1，异类为 0，这里加上了一点点的平滑
-def build_idea(labels, sigma_in=0.99, sigma_out=0.01):
+def build_idea(labels, sigma_in=1.29, sigma_out=0.01):
     # 生成固定的理想图（仅用于最后一层对齐）
     same = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()  # [B,B]
     diff = 1.0 - same
     # 类内 > 1 放大相似度（更紧）
     # 类间 < 1 削弱相似度（更远）
-    A = same * sigma_in + diff * sigma_out
-    A = torch.maximum(A, torch.eye(A.size(0), device=config.device))
-    return normalize_sym(A)
+    A = same * sigma_in
+    return A
 # ======================================================
 # =====================GCN 模块=========================
 # ======================================================
@@ -80,7 +79,7 @@ class GAM(nn.Module):
 # =====================PGA 主结构=======================
 # ======================================================
 class PGAHead(nn.Module):
-    def __init__(self, num_layers, topk=8, t_diff=1, use_ema_target=True, ema_m=0.9):
+    def __init__(self, num_layers, topk=8, t_diff=1, use_ema_target=True, ema_m=0.90):
         super().__init__()
         self.gams = nn.ModuleList([GAM(512) for _ in range(num_layers)])
         self.topk = topk
@@ -135,7 +134,7 @@ class PGAHead(nn.Module):
                 self._ema_K[i] = nn.Parameter(K.detach().clone(), requires_grad=False) # 遍历每层的真实图 K 从计算图里面分离并复制一份不会参与反向传播，存储值副本
             self.initialized.fill_(1)
     
-    def forward(self, feats_final, labels, lambda_align_K=128, lambda_align_Z=64, lambda_idea=1.0, sigma_in=0.99, sigma_out=0.01, stopgrad=True):
+    def forward(self, feats_final, labels, lambda_align_K=64, lambda_align_Z=16, sigma_in=0.99, sigma_out=0.01):
         L = len(feats_final)
 
         A_list, K_list, Z_list = [], [], []
@@ -156,7 +155,7 @@ class PGAHead(nn.Module):
         loss_align_Z = torch.zeros((), device=config.device)
         for i in range(1, L):
             Ki_prev = K_list[i - 1]
-            Ki_tgt  = self._ema_K[i].detach() if self.use_ema_target else (K_list[i].detach() if stopgrad else K_list[i])
+            Ki_tgt  = self._ema_K[i].detach() if self.use_ema_target else K_list[i].detach()
             loss_align_K = loss_align_K + (Ki_prev - Ki_tgt).pow(2).mean()
 
             Zi_prev = F.normalize(self.proj(Z_list[i - 1]), dim=-1)
@@ -173,6 +172,6 @@ class PGAHead(nn.Module):
             "loss_idea":  loss_idea,
             "loss_pga":   lambda_align_K * loss_align_K + 
                           lambda_align_Z * loss_align_Z +
-                          lambda_idea * loss_idea
+                          1.0 * loss_idea
         }
         return losses
