@@ -16,7 +16,8 @@ class CosineClassifier(nn.Module):
         super().__init__()
         self.weight = nn.Parameter(torch.randn(num_classes, in_dim))
         nn.init.xavier_normal_(self.weight)
-        self.scale = scale  # 放大角度差异，确保梯度强
+        # 放大角度差异，确保梯度强
+        self.scale = scale 
 
     def forward(self, x):
         x = F.normalize(x, dim=1)
@@ -64,7 +65,7 @@ if __name__ == "__main__":
     backbone, softmax_head, pga, optimizer, scheduler = reset_all(num_classes=num_classes)
 
     train(
-        name="./webface_softmax_pga_log/softmax_v1",
+        name=config.name,
         model_backbone=backbone,
         head=softmax_head,
         pga=pga,
@@ -74,6 +75,42 @@ if __name__ == "__main__":
         scheduler=scheduler,
         device=config.device,
         warmup_epochs=config.warmup_epochs,
+        total_epochs=config.total_epochs,
+        lambda_K=64,
+        lambda_Z=16
+    )
+
+    backbone, softmax_head, pga, optimizer, scheduler = reset_all(num_classes=num_classes)
+
+    train(
+        name="./softmax_pga_log/softmax_v2",
+        model_backbone=backbone,
+        head=softmax_head,
+        pga=pga,
+        loader=loader,
+        val_loader=val_loader,
+        optimizer=optimizer,
+        scheduler=scheduler, 
+        device=config.device,
+        warmup_epochs=config.total_epochs,
+        total_epochs=config.total_epochs,
+        lambda_K=64,
+        lambda_Z=16
+    )
+
+    backbone, softmax_head, pga, optimizer, scheduler = reset_all(num_classes=num_classes)
+
+    train(
+        name="./softmax_pga_log/softmax_pga_v3",
+        model_backbone=backbone,
+        head=softmax_head,
+        pga=pga,
+        loader=loader,
+        val_loader=val_loader,
+        optimizer=optimizer,
+        scheduler=scheduler,
+        device=config.device,
+        warmup_epochs=config.total_epochs,
         total_epochs=config.total_epochs,
         lambda_K=64,
         lambda_Z=16

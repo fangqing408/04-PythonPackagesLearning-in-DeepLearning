@@ -9,7 +9,7 @@ class MobileNetWithPGA(nn.Module):
         self.bn_list = nn.ModuleList([nn.BatchNorm1d(512) for _ in range(5)])
 
     def forward(self, x):
-        feats = self.backbone(x)  # feats[-1] 已经是 backbone 输出
+        feats = self.backbone(x)
         feats_final = []
 
         for i, f in enumerate(feats):
