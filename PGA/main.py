@@ -4,15 +4,16 @@ from pga import PGAHead
 from models_mobilenet import MobileNet
 from heads_arcface import ArcFaceHead
 from pga_wrapper import MobileNetWithPGA
-from overlap_dataset import OverlapSampler, OverlapDataset
+from dataset_overlap import OverlapSampler, OverlapDataset
 from train_and_evaluate import train, evaluate
 from config import config
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import os, random, numpy as np, torch
 
 class CosineClassifier(nn.Module):
-    def __init__(self, in_dim=512, num_classes=10, scale=30.0):
+    def __init__(self, in_dim=512, num_classes=10, scale=32.0):
         super().__init__()
         self.weight = nn.Parameter(torch.randn(num_classes, in_dim))
         nn.init.xavier_normal_(self.weight)
@@ -29,7 +30,7 @@ def reset_all():
     # 重新初始化所有对象
     backbone = MobileNetWithPGA(embedding_size=512).to(config.device)
     # softmax_head = nn.Linear(512, num_classes).to(config.device) # pga 是必须的，其他的方法需要和他进行比较
-    softmax_head = CosineClassifier(in_dim=512, num_classes=10, scale=30.0).to(config.device)
+    softmax_head = CosineClassifier(in_dim=512, num_classes=10, scale=32.0).to(config.device)
     # arcface_head = ArcFaceHead(in_features=512, out_features=num_classes).to(config.device) # 暂时先不对 arcface 分类头进行训练，先对比最基础的 softmax 分类头
     pga = PGAHead(num_layers=5).to(config.device)
 
@@ -64,7 +65,7 @@ if __name__ == "__main__":
     backbone, softmax_head, pga, optimizer, scheduler = reset_all()
 
     train(
-        name="./log/pga_randomsampler_real",
+        name="./train_mnist_log/pga_v4",
         model_backbone=backbone,
         head=softmax_head,
         pga=pga,
@@ -77,5 +78,18 @@ if __name__ == "__main__":
         total_epochs=config.total_epochs,
         lambda_K=64,
         lambda_Z=16,
-        lambda_idea=1.0
+        lambda_idea=1.0,
+        lambda_modify=False
     )
+
+# Dataset：MNIST（28 * 28 -> 128 * 128），未进行任何的图像增强
+# ===========================================================================================================================================================================
+# type_name | lambda_K | lambda_Z | lambda_idea | lambda_phase |    ema    | total_epochs | warmup_epochs |  alpha  | beta |  lr  | lr_pga | sigma_in | sigma_out | val_acc |
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#    pga_v1 |     4-64 |     4-16 |         1.0 |      0.5-0.5 | 0.85-0.95 |          100 |            10 | 1.0-1.2 |    \ | 1e-5 |   3e-6 |     0.99 |      0.00 |  98.60% |
+#    pga_v2 | 4-64-6.4 | 4-16-1.6 |         1.0 |  0.5-0.2-0.3 | 0.85-0.95 |          100 |            10 | 1.0-1.2 |    \ | 1e-5 |   3e-6 |     0.99 |      0.00 |  98.61% |
+#    pga_v3 |     4-64 |     4-16 |         1.0 |      0.5-0.5 |       0.9 |          100 |            10 | 1.0-1.2 |    \ | 1e-5 |   1e-6 |     0.99 |      0.00 |  98.66% |
+#softmax_v1 |        \ |        \ |           \ |            \ |         \ |          100 |            10 |       \ |    \ | 1e-5 |      \ |        \ |         \ |  98.21% |
+# ===========================================================================================================================================================================
+
+# Dataset：CASIA-WebFace，进行了随机翻转 0.5，和（128 * 128 -> 144 * 144 -> 128 * 128）的随即裁剪
