@@ -2,30 +2,66 @@ import torch
 import torch.nn.functional as F
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
-import math
+import math, os
+import torchvision.transforms as T
+from PIL import Image
 
 @torch.no_grad()
 def evaluate(model_backbone, head, pga, val_loader, device):
     model_backbone.eval()
     head.eval()
     pga.eval()
-
     correct, total = 0, 0
     total_loss = 0.0
-
     for imgs, labels in val_loader:
         imgs = imgs.to(device)
         labels = labels.to(device)
-
         feats_final = model_backbone(imgs)
         logits = head(feats_final[-1])
-
         total_loss += F.cross_entropy(logits, labels).item()
         preds = torch.argmax(logits, dim=1)
         correct += (preds == labels).sum().item()
         total += labels.size(0)
-
     return total_loss / len(val_loader), correct / total
+
+@torch.no_grad()
+def evaluate_lfw(model_backbone, head, pairs_file, root, device):
+    model_backbone.eval()
+    head.eval()
+    transform = T.Compose([
+        T.Resize((112, 112)),
+        T.ToTensor(),
+        T.Normalize(mean=[0.5] * 3, std=[0.5] * 3)
+    ])
+    sims, labels = [], []
+    with open(pairs_file, "r") as f:
+        lines = [l.strip() for l in f if l.strip()]
+
+    for line in tqdm(lines):
+        p1, p2, label = line.split()
+        img1_path = os.path.join(root, p1)
+        img2_path = os.path.join(root, p2)
+        img1 = Image.open(img1_path).convert("L")
+        img2 = Image.open(img2_path).convert("L")
+        img1 = transform(img1).unsqueeze(0).to(device)
+        img2 = transform(img2).unsqueeze(0).to(device)
+
+        f1 = model_backbone(img1)[-1]
+        f2 = model_backbone(img2)[-1]
+        e1 = F.normalize(head(f1), dim=1)
+        e2 = F.normalize(head(f2), dim=1)
+        sims.append(F.cosine_similarity(e1, e2).cpu())
+        labels.append(float(label))
+
+    sims = torch.cat(sims)
+    labels = torch.tensor(labels)
+
+    best_acc, best_th = 0, 0
+    for th in torch.linspace(0, 1, 50):
+        acc = (((sims > th).float()) == labels).float().mean().item()
+        if acc > best_acc:
+            best_acc, best_th = acc, th.item()
+    return best_th, best_acc
 
 def lambda_three_phase(epoch, total_epochs, warmup_epochs, peak_value, start_value=4, end_ratio=0.1, lambda_modify=False):
     rise_end = int(total_epochs * 0.5)
@@ -34,7 +70,6 @@ def lambda_three_phase(epoch, total_epochs, warmup_epochs, peak_value, start_val
     else:
         flat_end = total_epochs
     end_value = peak_value * end_ratio
-
     if epoch < warmup_epochs:
         return start_value
     elif epoch < rise_end:
@@ -46,89 +81,82 @@ def lambda_three_phase(epoch, total_epochs, warmup_epochs, peak_value, start_val
         t = (epoch - flat_end) / max(total_epochs - flat_end, 1)
         return end_value + 0.5 * (1 + math.cos(math.pi * t)) * (peak_value - end_value)
     
-def ema_cosine_schedule(epoch, total_epochs, m_start=0.85, m_end=0.95):
-    p = epoch / max(total_epochs - 1, 1)
-    m = m_start + 0.5 * (1 - math.cos(math.pi * p)) * (m_end - m_start)
-    return m
-
-def train(name, 
-          model_backbone, 
-          head, 
-          pga, 
-          loader, 
-          val_loader, 
-          optimizer, 
-          scheduler, 
-          device, 
-          warmup_epochs=10, 
-          total_epochs=100, 
-          lambda_K=64, 
-          lambda_Z=16, 
-          lambda_idea=1.0, 
-          lambda_modify=False
-    ):
+def train(name, model_backbone, head, pga, loader, val_loader, optimizer, scheduler, device, 
+          warmup_epochs=10, total_epochs=100, lambda_K=64, lambda_Z=16, lambda_idea=1.0, lambda_modify=False):
     writer = SummaryWriter(log_dir=name)
     model_backbone.train()
     head.train()
     pga.train()
-
     for epoch in range(total_epochs):
         pbar = tqdm(loader, desc=f"[epoch {epoch}/{total_epochs - 1}]")
         total_cls_loss = 0.0
         total_pga_loss = 0.0
-        ema_m = 0.9
-        
-        lambda_align_K = lambda_three_phase(epoch, total_epochs, warmup_epochs, peak_value=lambda_K, start_value=4, end_ratio=0.1, lambda_modify=lambda_modify)
-        lambda_align_Z = lambda_three_phase(epoch, total_epochs, warmup_epochs * 2, peak_value=lambda_Z, start_value=4, end_ratio=0.1, lambda_modify=lambda_modify)
-
+        lambda_align_K = lambda_three_phase(
+            epoch, 
+            total_epochs, 
+            warmup_epochs, 
+            peak_value=lambda_K, 
+            start_value=4, 
+            end_ratio=0.1, 
+            lambda_modify=lambda_modify
+        )
+        lambda_align_Z = lambda_three_phase(
+            epoch, 
+            total_epochs, 
+            warmup_epochs * 2, 
+            peak_value=lambda_Z, 
+            start_value=4, 
+            end_ratio=0.1, 
+            lambda_modify=lambda_modify
+        )
         for imgs, labels in pbar:
             imgs = imgs.to(device, non_blocking=True)
             labels = labels.to(device, non_blocking=True)
-
             feats_final = model_backbone(imgs)
-
             if epoch >= warmup_epochs:
-                ema_m = float(ema_cosine_schedule(epoch, total_epochs, 0.9, 0.9))
-                losses = pga(feats_final, labels, lambda_align_K=lambda_align_K, lambda_align_Z=lambda_align_Z, lambda_idea=lambda_idea, ema_m=ema_m)
+                losses = pga(
+                    feats_final=feats_final, 
+                    labels=labels, 
+                    lambda_align_K=lambda_align_K, 
+                    lambda_align_Z=lambda_align_Z, 
+                    lambda_idea=lambda_idea
+                )
                 loss_pga = losses["loss_pga"]
                 logits = head(feats_final[-1])
             else: 
                 # 用 feats_final[-1] 做分类，且不要影响 PGA 网络的梯度
                 logits = head(feats_final[-1])
                 loss_pga = torch.zeros(1, device=device)
-
             cls_loss = F.cross_entropy(logits, labels)
-
             total_loss = cls_loss + loss_pga
             optimizer.zero_grad()
             total_loss.backward()
             optimizer.step()
-
             total_cls_loss += cls_loss.item()
             total_pga_loss += loss_pga.item()
-
             pbar.set_postfix({
                 "cls": f"{cls_loss.item():.4f}",
                 "pga": f"{loss_pga.item():.4f}"
             })
-
-        val_avg_loss, val_acc = evaluate(model_backbone, head, pga, val_loader, device)
-
+        val_avg_loss, val_acc = evaluate(
+            model_backbone=model_backbone, 
+            head=head, 
+            pga=pga, 
+            val_loader=val_loader, 
+            device=device
+        )
         avg_cls = total_cls_loss / len(loader)
         avg_pga = total_pga_loss / len(loader)
-
         writer.add_scalars("Loss/train", {
             "cls": avg_cls,
             "pga": avg_pga,
             "val": val_avg_loss
         }, epoch)
-
         writer.add_scalar("Acc/val", val_acc, epoch)
-
         lr = optimizer.param_groups[0]["lr"]
         lr_pga = optimizer.param_groups[2]["lr"]
         print(
-            f"epoch {epoch:03d} | cls={avg_cls:.4f} | pga={avg_pga:.4f} | val_loss={val_avg_loss:.4f} | ema_m={ema_m:.4f} | "
+            f"epoch {epoch:03d} | cls={avg_cls:.4f} | pga={avg_pga:.4f} | val_loss={val_avg_loss:.4f} | "
             f"lr={lr:.8f} | lr_pga={lr_pga:.8f} | val_acc={val_acc * 100:.2f}% | lambda_align_K={lambda_align_K:.4f} | lambda_align_Z={lambda_align_Z:.4f}"
         )
         ckpt = {

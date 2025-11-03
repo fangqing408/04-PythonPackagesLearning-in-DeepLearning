@@ -1,5 +1,4 @@
 import torch.nn as nn
-import torch.nn.functional as F
 
 # ======================================================
 # ====================基础模块==========================
@@ -7,7 +6,7 @@ import torch.nn.functional as F
 class Flatten(nn.Module):
     def forward(self, x):
         return x.reshape(x.shape[0], -1)
-
+    
 class ConvBn(nn.Module):
     def __init__(self, in_c, out_c, kernel=(1, 1), stride=1, padding=0, groups=1):
         super().__init__()
@@ -17,7 +16,7 @@ class ConvBn(nn.Module):
         )
     def forward(self, x):
         return self.net(x)
-
+    
 class ConvBnPrelu(nn.Module):
     def __init__(self, in_c, out_c, kernel=(1, 1), stride=1, padding=0, groups=1):
         super().__init__()
@@ -27,7 +26,7 @@ class ConvBnPrelu(nn.Module):
         )
     def forward(self, x):
         return self.net(x)
-
+    
 class DepthWise(nn.Module):
     def __init__(self, in_c, out_c, kernel=(3,3), stride=1, padding=1, groups=1):
         super().__init__()
@@ -51,7 +50,7 @@ class DepthWiseRes(nn.Module):
             return self.net(x) + self.shortcut(x)
         else:
             return self.net(x) + x
-
+        
 class MultiDepthWiseRes(nn.Module):
     def __init__(self, num_block, channels, kernel=(3,3), stride=1, padding=1):
         super().__init__()
@@ -61,6 +60,7 @@ class MultiDepthWiseRes(nn.Module):
         ])
     def forward(self, x):
         return self.net(x)
+    
 # ======================================================
 # ===================骨架网络===========================
 # ======================================================
@@ -69,27 +69,22 @@ class MobileNet(nn.Module):
         super().__init__()
         self.conv1 = ConvBnPrelu(1, 64, kernel=(3,3), stride=2, padding=1)
         self.conv2 = ConvBnPrelu(64, 64, kernel=(3,3), stride=1, padding=1)
-
         self.backbone1 = nn.Sequential(
             DepthWiseRes(64, 64, stride=1),
             MultiDepthWiseRes(num_block=2, channels=64)
         )
-        
         self.backbone2 = nn.Sequential(
             DepthWiseRes(64, 128, stride=2),
             MultiDepthWiseRes(num_block=4, channels=128)
         )
-
         self.backbone3 = nn.Sequential(
             DepthWiseRes(128, 128, stride=1),
             MultiDepthWiseRes(num_block=4, channels=128)
         )
-
         self.backbone4 = nn.Sequential(
             DepthWiseRes(128, 256, stride=2),
             MultiDepthWiseRes(num_block=2, channels=256)
         )
-
         self.backbone5 = nn.Sequential(
             DepthWiseRes(256, 512, stride=2),
             MultiDepthWiseRes(num_block=2, channels=512)
@@ -113,20 +108,14 @@ class MobileNet(nn.Module):
         feats = []  # 每个 backbone 输出的[B, 512]
         x = self.conv1(x)
         x = self.conv2(x)
-
         x = self.backbone1(x)
         feats.append(self.proj[0](x))
-
         x = self.backbone2(x)
         feats.append(self.proj[1](x))
-
         x = self.backbone3(x)
         feats.append(self.proj[2](x))
-
         x = self.backbone4(x)
         feats.append(self.proj[3](x))
-
         x = self.backbone5(x)
         feats.append(self.proj[4](x))
-
         return feats
