@@ -17,7 +17,5 @@ mnist_test_torch
 mnist_train_torch
 lmdb
 checkpoints
-log
-arcface_pga_log
-train_mnist_enhance_log
-CASIA-WebFace-Expanded
+
+# log_files

@@ -5,7 +5,7 @@ class Config:
     # ==================================================
     # ==================default=========================
     # ==================================================
-    batch_size = 128
+    batch_size = 256
 
     overlap_ratio = 0.4
     overlap_shuffle = True
@@ -20,48 +20,50 @@ class Config:
     num_workers = 4
     pin_memory = True
     drop_last = True
-    tensorboard_name = "./train_mnist_log/pga_v5"
+    tensorboard_name = "./train_casia_log/softmax_v1"
     embedding_size = 512
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    cosine_scale = 32
+    cosine_scale = 16
     num_layers = 5
     topk = 8
     t_diff = 1
     use_ema = True
     ema_m = 0.9
-    learning_rate = 1e-5
-    learning_rate_pga = 1e-6
+    learning_rate = 2e-5
+    learning_rate_pga = 5e-6
     weight_decay = 1e-5
-    warmup_epochs = 10
+    weight_decay_pga = 0.0
+    warmup_epochs = 16
     total_epochs = 100
     lambda_K = 64
     lambda_Z = 16
     lambda_idea = 1
     lambda_modify = False
-    input_shape = [1, 128, 128]
+    input_shape = [3, 128, 128]
     # ==================================================
     # ===================train==========================
     # ==================================================
-    train_root = "mnist_train_torch"
+    train_root = "./mnist_train_torch"
+    casia_train_root = "./CASIA-WebFace"
     train_transform = T.Compose([ 
-        T.Grayscale(num_output_channels=1),
-        # T.RandomHorizontalFlip(p=0.5), # MNIST 禁止使用，数字具有方向性，翻转会带来语义混乱
+        # T.Grayscale(num_output_channels=1),
+        T.RandomHorizontalFlip(p=0.5), # MNIST 禁止使用，数字具有方向性，翻转会带来语义混乱
         T.Resize((128, 128)),
         # T.RandomCrop(input_shape[1:]),
         T.ToTensor(),
-        T.Normalize(mean=[0.1307], std=[0.3081]) 
+        T.Normalize(mean=[0.5] * 3, std=[0.5] * 3) 
         # 需要注意的是，这个 mean 指的是均值减去 0.5 并不是把当前的像素点的均值变成 0.5，
         # 也就是默认了现在的均值为 0.5，标准差为 0.5，转化为了均值为 0，标准差为 1 的一般形式
     ])
     # ==================================================
     # ===================test===========================
     # ==================================================
-    test_root = "mnist_test_torch"
-    lfw_pair = "./lfw_test_pair.txt"
-    lfw_test_root = "./lfw-align-128"
+    test_root = "./mnist_test_torch"
+    lfw_pair = "./data/lfw_test_pair.txt"
+    lfw_test_root = "./data/lfw-align-128"
     test_transform = T.Compose([
         T.Grayscale(num_output_channels=1),
-        T.Resize(input_shape[1:]),
+        # T.Resize(input_shape[1:]),
         T.ToTensor(),
         T.Normalize(mean=[0.1307], std=[0.3081])
     ])

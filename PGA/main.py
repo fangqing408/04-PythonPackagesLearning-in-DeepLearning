@@ -4,7 +4,9 @@ from pga import PGAHead
 from heads_arcface import ArcFaceHead
 from pga_wrapper import MobileNetWithPGA
 from dataset_overlap import OverlapSampler, OverlapDataset
-from train_and_evaluate import train
+from dataset_pk import PKSampler, PKDataset
+from train_and_evaluate_MNIST import train_MNIST
+from train_and_evaluate_CASIA import train_CASIA
 from config import config
 import torch
 import torch.nn as nn
@@ -47,36 +49,41 @@ def reset_all(num_classes):
     ).to(config.device)
     optimizer = optim.AdamW([
         {"params": backbone.parameters(), "lr": config.learning_rate},
-        {"params": softmax_head.parameters(), "lr": config.learning_rate},
-        {"params": pga.parameters(), "lr": config.learning_rate_pga}
+        {"params": softmax_head.parameters(), "lr": config.learning_rate * 3},
     ], weight_decay=config.weight_decay)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer=optimizer, 
         T_max=config.total_epochs,
         eta_min=config.learning_rate * 0.01
     )
-    return backbone, softmax_head, pga, optimizer, scheduler
+    optimizer_pga = optim.AdamW([
+        {"params": pga.parameters(), "lr": config.learning_rate_pga}
+    ], weight_decay=config.weight_decay_pga) 
+    scheduler_pga = torch.optim.lr_scheduler.CosineAnnealingLR( 
+        optimizer=optimizer_pga,
+        T_max=config.total_epochs - config.warmup_epochs,
+        eta_min=config.learning_rate_pga * 0.1
+    )
+    return backbone, softmax_head, pga, optimizer, scheduler, optimizer_pga, scheduler_pga
 
 # ======================================================
 # ===============创建 Overlap_DataLoader================
 # ======================================================
 if __name__ == "__main__":
-    dataset = OverlapDataset(root=config.train_root, transform=config.train_transform)
+    dataset = PKDataset(root=config.casia_train_root, transform=config.train_transform)
     # 三天找不到原因，原来没打乱数据集，采样器直接顺序加载的导致每个 batch 里面最多只包含两个类别，导致每个 batch 里面的损失出现先降后升，最后一直降不下去的情况
     # 交叠了话，每个 batch 训练到的图是半静态的，怎么感觉越改越返璞归真
-    sampler = OverlapSampler(
+    sampler = PKSampler(
         data=dataset, 
-        batch_size=config.batch_size, 
-        overlap_ratio=config.overlap_ratio, 
-        shuffle=config.overlap_shuffle
+        P=config.pk_P,
+        K=config.pk_K,
+        shuffle=config.pk_shuffle
     )
     loader = DataLoader(
         dataset=dataset, 
-        batch_size=config.batch_size, 
-        shuffle=config.dataloader_shuffle, 
+        batch_sampler=sampler,
         num_workers=config.num_workers, 
         pin_memory=config.pin_memory, 
-        drop_last=config.drop_last
     )
     # imgs, labels = next(iter(loader))
     # print(labels) # 验证当前的 loader 加载的数据集的打乱情况，当前的 loader 纯手动实现的加载，防止出现没有交叠出现学不到结构的情况
@@ -90,25 +97,26 @@ if __name__ == "__main__":
         drop_last=config.drop_last
     )
     num_classes = dataset.num_classes
-    backbone, softmax_head, pga, optimizer, scheduler = reset_all(num_classes=num_classes)
-    train(
-        name=config.tensorboard_name,
-        model_backbone=backbone,
-        head=softmax_head,
-        pga=pga,
-        loader=loader,
-        val_loader=val_loader,
-        optimizer=optimizer,
-        scheduler=scheduler,
-        device=config.device,
-        warmup_epochs=config.warmup_epochs,
-        total_epochs=config.total_epochs,
-        lambda_K=config.lambda_K,
-        lambda_Z=config.lambda_Z, 
-        lambda_idea=config.lambda_idea,
-        lambda_modify = config.lambda_modify
-    )
+    backbone, softmax_head, pga, optimizer, scheduler, optimizer_pga, scheduler_pga = reset_all(num_classes=num_classes)
+    # train_MNIST(
+    #     name=config.tensorboard_name,
+    #     model_backbone=backbone,
+    #     head=softmax_head,
+    #     pga=pga,
+    #     loader=loader,
+    #     val_loader=val_loader,
+    #     optimizer=optimizer,
+    #     scheduler=scheduler,
+    #     device=config.device,
+    #     warmup_epochs=config.warmup_epochs,
+    #     total_epochs=config.total_epochs,
+    #     lambda_K=config.lambda_K,
+    #     lambda_Z=config.lambda_Z, 
+    #     lambda_idea=config.lambda_idea,
+    #     lambda_modify = config.lambda_modify
+    # )
 # Dataset：MNIST（28×28 -> 128×128），未进行任何的图像增强，验证有效性
+# batch_size = 128, t_diff = 1, topk = 8，in_channels = 1
 # ===========================================================================================================================================================================
 # type_name | lambda_K | lambda_Z | lambda_idea | lambda_phase |    ema    | total_epochs | warmup_epochs |  alpha  | beta |  lr  | lr_pga | sigma_in | sigma_out | val_acc |
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -120,11 +128,36 @@ if __name__ == "__main__":
 #softmax_v1 |        \ |        \ |           \ |            \ |         \ |          100 |            10 |       \ |    \ | 1e-5 |      \ |        \ |         \ |  98.21% |
 #softmax_v2 |        \ |        \ |           \ |            \ |         \ |          100 |            10 |       \ |    \ | 1e-5 |      \ |        \ |         \ |  98.17% |
 # ===========================================================================================================================================================================
-
+    train_CASIA(
+        name=config.tensorboard_name,
+        model_backbone=backbone,
+        head=softmax_head,
+        pga=pga,
+        loader=loader,
+        lfw_test_root=config.lfw_test_root,
+        pairs_file=config.lfw_pair,
+        optimizer=optimizer,
+        optimizer_pga=optimizer_pga,
+        scheduler_pga=scheduler_pga,
+        scheduler=scheduler,
+        device=config.device,
+        warmup_epochs=config.total_epochs,
+        total_epochs=config.total_epochs,
+        lambda_K=config.lambda_K,
+        lambda_Z=config.lambda_Z, 
+        lambda_idea=config.lambda_idea,
+        lambda_modify = config.lambda_modify
+    )
 # MNIST 只有 10 类，特征维度低（28×28 灰度），类内差异很小，这意味着 batch 里每个类的样本有限，同类节点之间的相似度矩阵几乎是完美的块状结构
 # 这也是为什么后期的损失下降缓慢的原因？
 # 在这种场景下，普通的分类损失（CrossEntropy/ArcFace）已经能学到近乎最优的边界
 # CASIA-WebFace 有上万类、几十万张人脸，每类人脸姿态、光照、年龄差异很大
 # 同类样本在 embedding 空间中往往分散成多个子簇，所以在大规模高维人脸数据集上，PGA 的收益应该更明显且更稳定
 
-# Dataset：CASIA-WebFace，进行了随机翻转 0.5，和（128 * 128 -> 144 * 144 -> 128 * 128）的随即裁剪，待做...
+# Dataset：CASIA-WebFace，进行了随机翻转 0.5
+# batch_size = 256 (P=16, K=16), t_diff = 1, topk = 8，in_channels = 1
+# ===========================================================================================================================================================================
+# type_name | lambda_K | lambda_Z | lambda_idea | lambda_phase |    ema    | total_epochs | warmup_epochs |  alpha  | beta |  lr  | lr_pga | sigma_in | sigma_out | val_acc |
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#softmax_v1 |        \ |        \ |           \ |            \ |         \ |          100 |            16 |       \ |    \ | 2e-5 |      \ |        \ |         \ |  98.17% |
+# ===========================================================================================================================================================================

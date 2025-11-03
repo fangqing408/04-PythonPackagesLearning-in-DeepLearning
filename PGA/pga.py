@@ -117,7 +117,7 @@ class PGAHead(nn.Module):
         self.num_layers = num_layers
         # α, β 可为标量或每层独立的 list/张量（默认类内↑类间↓）
         self.alpha_sched = torch.linspace(
-            start=1.00, 
+            start=0.80, 
             end=1.20, 
             steps=num_layers
         ).tolist()

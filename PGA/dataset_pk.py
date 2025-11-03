@@ -24,7 +24,7 @@ class PKDataset(Dataset):
         return len(self.samples)
     def __getitem__(self, idx):
         img_path, label = self.samples[idx]
-        img = Image.open(img_path).convert("L")
+        img = Image.open(img_path).convert("RGB")
         if self.transform: img = self.transform(img)
         return img, label
 

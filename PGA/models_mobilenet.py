@@ -67,7 +67,8 @@ class MultiDepthWiseRes(nn.Module):
 class MobileNet(nn.Module):
     def __init__(self, embedding_size=512):
         super().__init__()
-        self.conv1 = ConvBnPrelu(1, 64, kernel=(3,3), stride=2, padding=1)
+        # 设置输入的维度，至关重要，常见的就是 3 或者 1
+        self.conv1 = ConvBnPrelu(3, 64, kernel=(3,3), stride=2, padding=1)
         self.conv2 = ConvBnPrelu(64, 64, kernel=(3,3), stride=1, padding=1)
         self.backbone1 = nn.Sequential(
             DepthWiseRes(64, 64, stride=1),

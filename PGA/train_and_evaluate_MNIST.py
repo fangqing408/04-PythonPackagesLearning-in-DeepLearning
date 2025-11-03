@@ -2,9 +2,8 @@ import torch
 import torch.nn.functional as F
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
-import math, os
+import math
 import torchvision.transforms as T
-from PIL import Image
 
 @torch.no_grad()
 def evaluate(model_backbone, head, pga, val_loader, device):
@@ -24,45 +23,6 @@ def evaluate(model_backbone, head, pga, val_loader, device):
         total += labels.size(0)
     return total_loss / len(val_loader), correct / total
 
-@torch.no_grad()
-def evaluate_lfw(model_backbone, head, pairs_file, root, device):
-    model_backbone.eval()
-    head.eval()
-    transform = T.Compose([
-        T.Resize((112, 112)),
-        T.ToTensor(),
-        T.Normalize(mean=[0.5] * 3, std=[0.5] * 3)
-    ])
-    sims, labels = [], []
-    with open(pairs_file, "r") as f:
-        lines = [l.strip() for l in f if l.strip()]
-
-    for line in tqdm(lines):
-        p1, p2, label = line.split()
-        img1_path = os.path.join(root, p1)
-        img2_path = os.path.join(root, p2)
-        img1 = Image.open(img1_path).convert("L")
-        img2 = Image.open(img2_path).convert("L")
-        img1 = transform(img1).unsqueeze(0).to(device)
-        img2 = transform(img2).unsqueeze(0).to(device)
-
-        f1 = model_backbone(img1)[-1]
-        f2 = model_backbone(img2)[-1]
-        e1 = F.normalize(head(f1), dim=1)
-        e2 = F.normalize(head(f2), dim=1)
-        sims.append(F.cosine_similarity(e1, e2).cpu())
-        labels.append(float(label))
-
-    sims = torch.cat(sims)
-    labels = torch.tensor(labels)
-
-    best_acc, best_th = 0, 0
-    for th in torch.linspace(0, 1, 50):
-        acc = (((sims > th).float()) == labels).float().mean().item()
-        if acc > best_acc:
-            best_acc, best_th = acc, th.item()
-    return best_th, best_acc
-
 def lambda_three_phase(epoch, total_epochs, warmup_epochs, peak_value, start_value=4, end_ratio=0.1, lambda_modify=False):
     rise_end = int(total_epochs * 0.5)
     if lambda_modify:
@@ -81,7 +41,7 @@ def lambda_three_phase(epoch, total_epochs, warmup_epochs, peak_value, start_val
         t = (epoch - flat_end) / max(total_epochs - flat_end, 1)
         return end_value + 0.5 * (1 + math.cos(math.pi * t)) * (peak_value - end_value)
     
-def train(name, model_backbone, head, pga, loader, val_loader, optimizer, scheduler, device, 
+def train_MNIST(name, model_backbone, head, pga, loader, val_loader, optimizer, scheduler, device, 
           warmup_epochs=10, total_epochs=100, lambda_K=64, lambda_Z=16, lambda_idea=1.0, lambda_modify=False):
     writer = SummaryWriter(log_dir=name)
     model_backbone.train()
@@ -92,18 +52,18 @@ def train(name, model_backbone, head, pga, loader, val_loader, optimizer, schedu
         total_cls_loss = 0.0
         total_pga_loss = 0.0
         lambda_align_K = lambda_three_phase(
-            epoch, 
-            total_epochs, 
-            warmup_epochs, 
+            epoch=epoch, 
+            total_epochs=total_epochs, 
+            warmup_epochs=warmup_epochs, 
             peak_value=lambda_K, 
             start_value=4, 
             end_ratio=0.1, 
             lambda_modify=lambda_modify
         )
         lambda_align_Z = lambda_three_phase(
-            epoch, 
-            total_epochs, 
-            warmup_epochs * 2, 
+            epoch=epoch, 
+            total_epochs=total_epochs, 
+            warmup_epochs=warmup_epochs * 2, 
             peak_value=lambda_Z, 
             start_value=4, 
             end_ratio=0.1, 
