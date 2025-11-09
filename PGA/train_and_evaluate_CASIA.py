@@ -31,8 +31,8 @@ def evaluate(model_backbone, head, pairs_file, root, device):
 
         f1 = model_backbone(img1)[-1]
         f2 = model_backbone(img2)[-1]
-        e1 = F.normalize(f1, dim=1)
-        e2 = F.normalize(f2, dim=1)
+        e1 = F.normalize(f1, dim=1, eps=1e-8)
+        e2 = F.normalize(f2, dim=1, eps=1e-8)
         sims.append(F.cosine_similarity(e1, e2).cpu())
         labels.append(float(label))
 
@@ -40,10 +40,12 @@ def evaluate(model_backbone, head, pairs_file, root, device):
     labels = torch.tensor(labels)
 
     best_acc, best_th = 0, 0
-    for th in torch.linspace(0, 1, 50):
+    for th in torch.linspace(-1, 1, 2000):
         acc = (((sims > th).float()) == labels).float().mean().item()
         if acc > best_acc:
             best_acc, best_th = acc, th.item()
+    model_backbone.train()
+    head.train()
     return best_th, best_acc
 
 def lambda_three_phase(epoch, total_epochs, warmup_epochs, peak_value, start_value=4, end_ratio=0.1, lambda_modify=False):
@@ -113,8 +115,12 @@ def train_CASIA(name, model_backbone, head, pga, loader, lfw_test_root, pairs_fi
             cls_loss = F.cross_entropy(logits, labels)
             total_loss = cls_loss + loss_pga
             optimizer.zero_grad()
+            if epoch >= warmup_epochs:
+                optimizer_pga.zero_grad()
             total_loss.backward()
             optimizer.step()
+            if epoch >= warmup_epochs:
+                optimizer_pga.step()
             total_cls_loss += cls_loss.item()
             total_pga_loss += loss_pga.item()
             pbar.set_postfix({

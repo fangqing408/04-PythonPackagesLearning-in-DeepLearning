@@ -5,41 +5,42 @@ class Config:
     # ==================================================
     # ==================default=========================
     # ==================================================
-    batch_size = 256
+    batch_size = 512
 
     overlap_ratio = 0.4
     overlap_shuffle = True
 
-    pk_P = 16
-    pk_K = 16
+    pk_P = 64
+    pk_K = 8
     pk_shuffle = True
     pk_seed = 42
     
     # 当自己实现采样器的话，DataLoader 的 shuffle 参数失效，否则为 True 为随机采样，False 为顺序采样
     dataloader_shuffle = True
-    num_workers = 4
+    num_workers = 6
     pin_memory = True
     drop_last = True
-    tensorboard_name = "./train_casia_log/softmax_v1"
+    tensorboard_name = "./train_casia_log_30/arcface_v1"
     embedding_size = 512
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cosine_scale = 16
-    num_layers = 5
-    topk = 8
+    num_layers = 10
+    topk = 6
     t_diff = 1
     use_ema = True
-    ema_m = 0.9
-    learning_rate = 2e-5
-    learning_rate_pga = 5e-6
-    weight_decay = 1e-5
+    ema_m = 0.8
+    learning_rate = 1e-3
+    learning_rate_pga = 5e-4
+    weight_decay = 5e-4
     weight_decay_pga = 0.0
-    warmup_epochs = 16
-    total_epochs = 100
-    lambda_K = 64
-    lambda_Z = 16
+    sgd_momentum = 0.9
+    warmup_epochs = 24
+    total_epochs = 175
+    lambda_K = 16
+    lambda_Z = 8
     lambda_idea = 1
     lambda_modify = False
-    input_shape = [3, 128, 128]
+    input_shape = [3, 112, 112]
     # ==================================================
     # ===================train==========================
     # ==================================================
@@ -48,10 +49,10 @@ class Config:
     train_transform = T.Compose([ 
         # T.Grayscale(num_output_channels=1),
         T.RandomHorizontalFlip(p=0.5), # MNIST 禁止使用，数字具有方向性，翻转会带来语义混乱
-        T.Resize((128, 128)),
-        # T.RandomCrop(input_shape[1:]),
+        T.Resize((136, 136)),
+        T.RandomCrop(input_shape[1:]),
         T.ToTensor(),
-        T.Normalize(mean=[0.5] * 3, std=[0.5] * 3) 
+        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) 
         # 需要注意的是，这个 mean 指的是均值减去 0.5 并不是把当前的像素点的均值变成 0.5，
         # 也就是默认了现在的均值为 0.5，标准差为 0.5，转化为了均值为 0，标准差为 1 的一般形式
     ])
@@ -63,7 +64,7 @@ class Config:
     lfw_test_root = "./data/lfw-align-128"
     test_transform = T.Compose([
         T.Grayscale(num_output_channels=1),
-        # T.Resize(input_shape[1:]),
+        T.Resize(input_shape[1:]),
         T.ToTensor(),
         T.Normalize(mean=[0.1307], std=[0.3081])
     ])

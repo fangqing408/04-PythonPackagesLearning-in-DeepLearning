@@ -21,6 +21,9 @@ def evaluate(model_backbone, head, pga, val_loader, device):
         preds = torch.argmax(logits, dim=1)
         correct += (preds == labels).sum().item()
         total += labels.size(0)
+    model_backbone.train()
+    head.train()
+    pga.train()
     return total_loss / len(val_loader), correct / total
 
 def lambda_three_phase(epoch, total_epochs, warmup_epochs, peak_value, start_value=4, end_ratio=0.1, lambda_modify=False):
@@ -41,7 +44,7 @@ def lambda_three_phase(epoch, total_epochs, warmup_epochs, peak_value, start_val
         t = (epoch - flat_end) / max(total_epochs - flat_end, 1)
         return end_value + 0.5 * (1 + math.cos(math.pi * t)) * (peak_value - end_value)
     
-def train_MNIST(name, model_backbone, head, pga, loader, val_loader, optimizer, scheduler, device, 
+def train_MNIST(name, model_backbone, head, pga, loader, val_loader, optimizer, scheduler, optimizer_pga, scheduler_pga, device, 
           warmup_epochs=10, total_epochs=100, lambda_K=64, lambda_Z=16, lambda_idea=1.0, lambda_modify=False):
     writer = SummaryWriter(log_dir=name)
     model_backbone.train()
@@ -90,8 +93,12 @@ def train_MNIST(name, model_backbone, head, pga, loader, val_loader, optimizer, 
             cls_loss = F.cross_entropy(logits, labels)
             total_loss = cls_loss + loss_pga
             optimizer.zero_grad()
+            if epoch >= warmup_epochs:
+                optimizer_pga.zero_grad()
             total_loss.backward()
             optimizer.step()
+            if epoch >= warmup_epochs:
+                optimizer_pga.step()
             total_cls_loss += cls_loss.item()
             total_pga_loss += loss_pga.item()
             pbar.set_postfix({
@@ -114,10 +121,11 @@ def train_MNIST(name, model_backbone, head, pga, loader, val_loader, optimizer, 
         }, epoch)
         writer.add_scalar("Acc/val", val_acc, epoch)
         lr = optimizer.param_groups[0]["lr"]
-        lr_pga = optimizer.param_groups[2]["lr"]
+        lr_head = optimizer.param_groups[1]["lr"]
+        lr_pga = optimizer_pga.param_groups[0]["lr"]
         print(
-            f"epoch {epoch:03d} | cls={avg_cls:.4f} | pga={avg_pga:.4f} | val_loss={val_avg_loss:.4f} | "
-            f"lr={lr:.8f} | lr_pga={lr_pga:.8f} | val_acc={val_acc * 100:.2f}% | lambda_align_K={lambda_align_K:.4f} | lambda_align_Z={lambda_align_Z:.4f}"
+            f"epoch {epoch:03d} | cls={avg_cls:.4f} | pga={avg_pga:.4f} | val_avg_loss={val_avg_loss:.4f} | val_acc={val_acc * 100:.2f}% | "
+            f"lr={lr:.8f} | lr_pga={lr_pga:.8f} | lr_head={lr_head:.8f} | lambda_align_K={lambda_align_K:.4f} | lambda_align_Z={lambda_align_Z:.4f}"
         )
         ckpt = {
             "epoch": epoch,
@@ -125,8 +133,12 @@ def train_MNIST(name, model_backbone, head, pga, loader, val_loader, optimizer, 
             "head": head.state_dict(),
             "pga": pga.state_dict(),
             "optimizer": optimizer.state_dict(),
-            "scheduler": scheduler.state_dict()
+            "scheduler": scheduler.state_dict(),
+            "optimizer_pga": optimizer_pga.state_dict(),
+            "scheduler_pga": scheduler_pga.state_dict()
         }
         torch.save(ckpt, f"./checkpoints/pga_{epoch}.pth")
         scheduler.step()
+        if epoch >= warmup_epochs:
+            scheduler_pga.step()
     writer.close()

@@ -3,10 +3,12 @@ from torch import optim
 from pga import PGAHead
 from heads_arcface import ArcFaceHead
 from pga_wrapper import MobileNetWithPGA
+from models_resnet50 import ResNet50
 from dataset_overlap import OverlapSampler, OverlapDataset
 from dataset_pk import PKSampler, PKDataset
 from train_and_evaluate_MNIST import train_MNIST
 from train_and_evaluate_CASIA import train_CASIA
+from train_and_evaluate_CASIA_ResNet50 import train_CASIA_ResNet50
 from config import config
 import torch
 import torch.nn as nn
@@ -20,25 +22,32 @@ class CosineClassifier(nn.Module):
         # 放大角度差异，确保梯度强
         self.scale = scale
     def forward(self, x):
-        x = F.normalize(x, dim=1)
-        w = F.normalize(self.weight, dim=1)
+        x = F.normalize(x, dim=1, eps=1e-8)
+        w = F.normalize(self.weight, dim=1, eps=1e-8)
         return self.scale * (x @ w.t())
     
 def reset_all(num_classes):
     # 重新初始化所有对象
     torch.cuda.empty_cache()
-    backbone = MobileNetWithPGA(embedding_size=config.embedding_size).to(config.device)
+
+    # backbone = MobileNetWithPGA(embedding_size=config.embedding_size).to(config.device)
+    model = ResNet50().to(config.device)
+
     # softmax_head = nn.Linear(
     #     in_features=config.embedding_size, 
     #     out_features=num_classes
     # ).to(config.device) # pga 是必须的，其他的方法需要和他进行比较
-    softmax_head = CosineClassifier(
-        in_dim=config.embedding_size, 
-        num_classes=num_classes, 
-        scale=config.cosine_scale
-    ).to(config.device)
+
+    # softmax_head = CosineClassifier(
+    #     in_dim=config.embedding_size, 
+    #     num_classes=num_classes, 
+    #     scale=config.cosine_scale
+    # ).to(config.device)
+    
     # 暂时先不对 arcface 分类头进行训练，先对比最基础的 softmax 分类头
+
     arcface_head = ArcFaceHead(in_features=config.embedding_size, out_features=num_classes).to(config.device)
+
     pga = PGAHead(
         num_layers=config.num_layers,
         device = config.device,
@@ -47,24 +56,58 @@ def reset_all(num_classes):
         use_ema = config.use_ema,
         ema_m = config.ema_m
     ).to(config.device)
-    optimizer = optim.AdamW([
-        {"params": backbone.parameters(), "lr": config.learning_rate},
-        {"params": softmax_head.parameters(), "lr": config.learning_rate * 3},
-    ], weight_decay=config.weight_decay)
+
+    # optimizer = optim.AdamW([
+    #     {"params": backbone.parameters(), "lr": config.learning_rate},
+    #     {"params": softmax_head.parameters(), "lr": config.learning_rate},
+    # ], weight_decay=config.weight_decay)
+    backbone, fc, bn_bias = [], [], []
+    for n,p in model.named_parameters():
+        if not p.requires_grad: continue
+        if n.startswith('fc'): fc.append(p)
+        elif p.ndim==1 or n.endswith('.bias') or 'bn' in n.lower(): bn_bias.append(p)
+        else: backbone.append(p)
+    
+    optimizer = optim.SGD([
+        {'params': backbone, 'lr': config.learning_rate, 'weight_decay': config.weight_decay},
+        {'params': bn_bias, 'lr': config.learning_rate, 'weight_decay': 0.0},
+        {"params": arcface_head.parameters(), "lr": 3 * config.learning_rate}
+    ], momentum=config.sgd_momentum)
+
+    # scheduler = torch.optim.lr_scheduler.StepLR(
+    #     optimizer=optimizer, 
+    #     step_size=2,
+    #     gamma=0.95
+    # )
+
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer=optimizer, 
+        optimizer=optimizer,  
         T_max=config.total_epochs,
         eta_min=config.learning_rate * 0.01
     )
+
     optimizer_pga = optim.AdamW([
         {"params": pga.parameters(), "lr": config.learning_rate_pga}
     ], weight_decay=config.weight_decay_pga) 
+    
+    # optimizer_pga = optim.SGD([
+    #     {"params": pga.parameters(), "lr": config.learning_rate_pga}
+    # ], weight_decay=config.weight_decay_pga) 
+
     scheduler_pga = torch.optim.lr_scheduler.CosineAnnealingLR( 
         optimizer=optimizer_pga,
         T_max=config.total_epochs - config.warmup_epochs,
-        eta_min=config.learning_rate_pga * 0.1
+        eta_min=config.learning_rate_pga * 0.02
     )
-    return backbone, softmax_head, pga, optimizer, scheduler, optimizer_pga, scheduler_pga
+
+    # scheduler_pga = torch.optim.lr_scheduler.StepLR( 
+    #     optimizer=optimizer_pga,
+    #     step_size=2,
+    #     gamma=0.95
+    # )
+
+    # return backbone, softmax_head, pga, optimizer, scheduler, optimizer_pga, scheduler_pga
+    return model, arcface_head, pga, optimizer, scheduler, optimizer_pga, scheduler_pga
 
 # ======================================================
 # ===============创建 Overlap_DataLoader================
@@ -79,11 +122,13 @@ if __name__ == "__main__":
         K=config.pk_K,
         shuffle=config.pk_shuffle
     )
-    loader = DataLoader(
+    loader = DataLoader( 
         dataset=dataset, 
         batch_sampler=sampler,
+        # shuffle=config.dataloader_shuffle,
         num_workers=config.num_workers, 
         pin_memory=config.pin_memory, 
+        # drop_last=config.drop_last
     )
     # imgs, labels = next(iter(loader))
     # print(labels) # 验证当前的 loader 加载的数据集的打乱情况，当前的 loader 纯手动实现的加载，防止出现没有交叠出现学不到结构的情况
@@ -97,8 +142,10 @@ if __name__ == "__main__":
         drop_last=config.drop_last
     )
     num_classes = dataset.num_classes
-    backbone, softmax_head, pga, optimizer, scheduler, optimizer_pga, scheduler_pga = reset_all(num_classes=num_classes)
-    # train_MNIST(
+    # backbone, softmax_head, pga, optimizer, scheduler, optimizer_pga, scheduler_pga = reset_all(num_classes=num_classes)
+
+    model, arcface_head, pga, optimizer, scheduler, optimizer_pga, scheduler_pga = reset_all(num_classes=num_classes)
+    # train_MNIST( 
     #     name=config.tensorboard_name,
     #     model_backbone=backbone,
     #     head=softmax_head,
@@ -107,6 +154,8 @@ if __name__ == "__main__":
     #     val_loader=val_loader,
     #     optimizer=optimizer,
     #     scheduler=scheduler,
+    #     optimizer_pga=optimizer_pga,
+    #     scheduler_pga=scheduler_pga,
     #     device=config.device,
     #     warmup_epochs=config.warmup_epochs,
     #     total_epochs=config.total_epochs,
@@ -115,31 +164,39 @@ if __name__ == "__main__":
     #     lambda_idea=config.lambda_idea,
     #     lambda_modify = config.lambda_modify
     # )
-# Dataset：MNIST（28×28 -> 128×128），未进行任何的图像增强，验证有效性
-# batch_size = 128, t_diff = 1, topk = 8，in_channels = 1
-# ===========================================================================================================================================================================
-# type_name | lambda_K | lambda_Z | lambda_idea | lambda_phase |    ema    | total_epochs | warmup_epochs |  alpha  | beta |  lr  | lr_pga | sigma_in | sigma_out | val_acc |
-# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#    pga_v1 |     4-64 |     4-16 |         1.0 |      0.5-0.5 | 0.85-0.95 |          100 |            10 | 1.0-1.2 |    \ | 1e-5 |   3e-6 |     0.99 |      0.00 |  98.60% |
-#    pga_v2 | 4-64-6.4 | 4-16-1.6 |         1.0 |  0.5-0.2-0.3 | 0.85-0.95 |          100 |            10 | 1.0-1.2 |    \ | 1e-5 |   3e-6 |     0.99 |      0.00 |  98.61% |
-#    pga_v3 |     4-64 |     4-16 |         1.0 |      0.5-0.5 |       0.9 |          100 |            10 | 1.0-1.2 |    \ | 1e-5 |   1e-6 |     0.99 |      0.00 |  98.66% |
-#    pga_v4 |     4-64 |     4-16 |         1.0 |      0.5-0.5 |       0.9 |          100 |            10 | 1.0-1.2 |    \ | 1e-5 |   1e-6 |     0.99 |      0.00 |  98.63% |
-#    pga_v5 |     4-64 |     4-16 |         1.0 |      0.5-0.5 |       0.9 |          100 |            10 | 1.0-1.2 |    \ | 1e-5 |   1e-6 |     0.99 |      0.00 |  98.66% |
-#softmax_v1 |        \ |        \ |           \ |            \ |         \ |          100 |            10 |       \ |    \ | 1e-5 |      \ |        \ |         \ |  98.21% |
-#softmax_v2 |        \ |        \ |           \ |            \ |         \ |          100 |            10 |       \ |    \ | 1e-5 |      \ |        \ |         \ |  98.17% |
-# ===========================================================================================================================================================================
-    train_CASIA(
+
+    # train_CASIA(
+    #     name=config.tensorboard_name,
+    #     model_backbone=backbone,
+    #     head=softmax_head,
+    #     pga=pga,
+    #     loader=loader,
+    #     lfw_test_root=config.lfw_test_root,
+    #     pairs_file=config.lfw_pair,
+    #     optimizer=optimizer,
+    #     scheduler=scheduler,
+    #     optimizer_pga=optimizer_pga,
+    #     scheduler_pga=scheduler_pga,
+    #     device=config.device,
+    #     warmup_epochs=config.total_epochs,
+    #     total_epochs=config.total_epochs,
+    #     lambda_K=config.lambda_K,
+    #     lambda_Z=config.lambda_Z, 
+    #     lambda_idea=config.lambda_idea,
+    #     lambda_modify = config.lambda_modify
+    # )
+    train_CASIA_ResNet50(
         name=config.tensorboard_name,
-        model_backbone=backbone,
-        head=softmax_head,
+        model=model,
+        head=arcface_head,
         pga=pga,
         loader=loader,
         lfw_test_root=config.lfw_test_root,
         pairs_file=config.lfw_pair,
         optimizer=optimizer,
+        scheduler=scheduler,
         optimizer_pga=optimizer_pga,
         scheduler_pga=scheduler_pga,
-        scheduler=scheduler,
         device=config.device,
         warmup_epochs=config.total_epochs,
         total_epochs=config.total_epochs,
@@ -154,10 +211,4 @@ if __name__ == "__main__":
 # CASIA-WebFace 有上万类、几十万张人脸，每类人脸姿态、光照、年龄差异很大
 # 同类样本在 embedding 空间中往往分散成多个子簇，所以在大规模高维人脸数据集上，PGA 的收益应该更明显且更稳定
 
-# Dataset：CASIA-WebFace，进行了随机翻转 0.5
-# batch_size = 256 (P=16, K=16), t_diff = 1, topk = 8，in_channels = 1
-# ===========================================================================================================================================================================
-# type_name | lambda_K | lambda_Z | lambda_idea | lambda_phase |    ema    | total_epochs | warmup_epochs |  alpha  | beta |  lr  | lr_pga | sigma_in | sigma_out | val_acc |
-# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#softmax_v1 |        \ |        \ |           \ |            \ |         \ |          100 |            16 |       \ |    \ | 2e-5 |      \ |        \ |         \ |  98.17% |
-# ===========================================================================================================================================================================
+# 不同的优化器和调度器之间天差地别，AdamW 常见的学习率为 1e-4 到 1e-3 范围，但是 SGD 常见的范围为 1e-3 到 1e-1 范围

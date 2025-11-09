@@ -1,0 +1,3 @@
+path,reason
+./CASIA-WebFace\0000662\441.jpg,non-finite tensor after train_transform
+./CASIA-WebFace\0182666\019.jpg,non-finite tensor after train_transform

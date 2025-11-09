@@ -7,7 +7,7 @@ import torch.nn.functional as F
 # ======================================================
 # 计算样本两两之间的余弦相似度矩阵
 def pairwise_cosine(X, eps=1e-8):
-    X = F.normalize(input=X, dim=-1) # [B, D]
+    X = F.normalize(input=X, eps=eps) # [B, D]
     sim = X @ X.t()
     return sim.clamp(min=-1.0 + eps, max=1.0 - eps) # [B, B]
 
@@ -18,6 +18,7 @@ def _knn_mask(sim, base_mask, device, topk=8):
     # 去掉自环，不许把自己选成自己的邻居，对角线上减去了一个极大的数字，后续 topk 不会选到他
     # 把不允许成为侯选边的设置为极小值，不会被 topk 取到
     sim_no_diag = sim - torch.eye(n=B, device=device) * 1e9
+    allowed = base_mask * (1.0 - torch.eye(n=B, device=device))
     masked = sim_no_diag * base_mask - (1.0 - base_mask) * 1e9
     topk = min(topk, max(B - 1, 1))
     # 每个维度从大到小取出前 k 个数，返回这 k 个数和他们的索引，一般用二元组承接，可以 .indices 只要索引
@@ -29,31 +30,25 @@ def _knn_mask(sim, base_mask, device, topk=8):
     m = torch.zeros_like(input=sim)
     # dim, idx, value，在 dim 维度上，将  idx 指定的位置置为 value
     m.scatter_(1, idx, 1.0)
+    m = m * allowed
     # 因为选取前 k 个可能得到的矩阵的单向边，这里将其变为对称矩阵
-    m = torch.maximum(m, m.t())
+    m = torch.maximum(m, m.t()) * allowed
     return m
 
 # 下面的写法经典又巧妙，.unsqueeze 在指定的维度上插入一个新维度，下面的写法利用广播得到了同类样本矩阵
 # 构建类内类间图邻接，暂时把 topk 置为 8，batch_size 置为 128
 def build_intra_inter(sim, labels, device, topk=8):
-    same = (labels.unsqueeze(dim=0) == labels.unsqueeze(dim=1)).float()
+    same = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()
     diff = 1.0 - same
-    M_intra = _knn_mask(
-        sim=sim, 
-        base_mask=same, 
-        device=device, 
-        topk=topk
-    ) # 类内图前 topk 同类邻居
-    M_inter = _knn_mask(
-        sim=sim, 
-        base_mask=diff, 
-        device=device, 
-        topk=topk
-    ) # 类间图前 topk 异类邻居
-    # 只保留正相似，避免噪声边，全都保留正的数值，越大越相似
-    A_intra = (sim * M_intra).clamp(min=0.0)
-    A_inter = (sim * M_inter).clamp(min=0.0)
-    return A_intra, A_inter
+
+    M_intra = _knn_mask(sim=sim, base_mask=same, device=device, topk=topk)  # {0,1}
+    M_inter = _knn_mask(sim=sim, base_mask=diff, device=device, topk=topk)  # {0,1}
+
+    # 只保留正相似
+    A_intra = (sim * M_intra).clamp(min=0.0) * same
+    A_inter = (sim * M_inter).clamp(min=0.0) * diff
+    return A_intra, A_inter, M_intra, M_inter
+
 
 # 做图的对称归一化，节点的度越大，信息扩散的时候就会被平均的越多，所以归一化，来平衡不同节点的影响
 def normalize_sym(A, eps=1e-8):
@@ -117,8 +112,8 @@ class PGAHead(nn.Module):
         self.num_layers = num_layers
         # α, β 可为标量或每层独立的 list/张量（默认类内↑类间↓）
         self.alpha_sched = torch.linspace(
-            start=0.80, 
-            end=1.20, 
+            start=1.0, 
+            end=1.0, 
             steps=num_layers
         ).tolist()
         self.beta_sched  = torch.linspace(
@@ -161,17 +156,14 @@ class PGAHead(nn.Module):
     
     def _graph(self, X, labels, a, b):
         S = pairwise_cosine(X)
-        A_intra, A_inter = build_intra_inter(
-            sim=S, 
-            labels=labels, 
-            device=self.device, 
-            topk=self.topk
+        A_intra, A_inter, M_intra, M_inter = build_intra_inter(
+            sim=S, labels=labels, device=self.device, topk=self.topk
         )
-        # 加一点自环，避免度为 0
-        A = a * A_intra + b * A_inter + 1e-6 * torch.eye(n=S.size(0), device=self.device)
+        A = a * A_intra + b * A_inter + 1e-6 * torch.eye(S.size(0), device=self.device)
         A_norm = normalize_sym(A)
         K = diffusion_kernel(A_norm=A_norm, t_diff=self.t_diff)
-        return A_norm, K
+        return A_norm, K, M_intra, M_inter
+
     
     def _init_ema_if_needed(self, K_list):
         if int(self.initialized.item()) == 1: return 
@@ -184,44 +176,59 @@ class PGAHead(nn.Module):
 
     def forward(self, feats_final, labels, lambda_align_K=64, lambda_align_Z=16, lambda_idea=1.0, sigma_in=0.99, sigma_out=0.00, stopgrad=True):
         A_list, K_list, Z_list = [], [], []
+        Min_list, Mout_list = [], []     # 新增：每层的类内/类间掩码
+
         for i, (X, gam) in enumerate(zip(feats_final, self.gams)):
-            a_i, b_i = self._get_alpha_beta(layer_idx=i)
-            Ai, Ki = self._graph(
-                X=X, 
-                labels=labels, 
-                a=a_i, 
-                b=b_i
-            )
+            a_i, b_i = self._get_alpha_beta(i)
+            Ai, Ki, Min, Mout = self._graph(X=X, labels=labels, a=a_i, b=b_i)
             Zi = gam(Ai, X)
-            A_list.append(Ai); K_list.append(Ki); Z_list.append(Zi) 
+            A_list.append(Ai); K_list.append(Ki); Z_list.append(Zi)
+            Min_list.append(Min); Mout_list.append(Mout)
+
         if self.use_ema:
             self._init_ema_if_needed(K_list)
             with torch.no_grad():
                 for i in range(self.num_layers):
                     self._ema_K[i].data.mul_(self.ema_m).add_(K_list[i].detach() * (1.0 - self.ema_m))
-        # 逐层定向对齐：|| K_{i-1} - sg[K_i] ||^2 和 || Z_{i-1} - sg[Z_i] ||^2
+
+        def masked_mse(A, B, M, eps=1e-8):
+            diff2 = (A - B).pow(2)
+            num = (diff2 * M).sum()
+            den = M.sum().clamp_min(eps)
+            return num / den
+
         loss_align_K = torch.zeros((), device=self.device)
         loss_align_Z = torch.zeros((), device=self.device)
+
         for i in range(1, self.num_layers):
             Ki_prev = K_list[i - 1]
-            Ki_tgt  = self._ema_K[i].detach() if self.use_ema else (K_list[i].detach() if stopgrad else K_list[i])
-            loss_align_K = loss_align_K + (Ki_prev - Ki_tgt).pow(2).mean()
-            Zi_prev = F.normalize(input=self.proj(Z_list[i - 1]), dim=-1)
-            Zi_curr = F.normalize(input=self.proj(Z_list[i]), dim=-1)
+            Ki_tgt  = self._ema_K[i].detach() if self.use_ema else K_list[i].detach() if stopgrad else K_list[i]
+            # 用类内掩码的并集：在哪一层是 top-k 都算有效边
+            M_eff = torch.maximum(Min_list[i-1], Min_list[i])  # {0,1}
+            loss_align_K = loss_align_K + masked_mse(Ki_prev, Ki_tgt, M_eff)
+
+            Zi_prev = F.normalize(self.proj(Z_list[i - 1]), dim=-1, eps=1e-8)
+            Zi_curr = F.normalize(self.proj(Z_list[i]),     dim=-1, eps=1e-8)
+            # Z 对齐保留全量均值（它是点级别，不是 BxB）
             loss_align_Z = loss_align_Z + (Zi_prev - Zi_curr.detach()).pow(2).mean()
-        K_out  = K_list[-1]
-        K_idea = build_idea(
-            labels=labels, 
-            sigma_in=sigma_in, 
-            sigma_out=sigma_out
-        ).to(self.device)
-        loss_idea = (K_out - K_idea).pow(2).mean()
+
+        # idea：只在最后一层的 top-k 边上计算（类内、类间分开）
+        # K_out  = K_list[-1]
+        # MinL, MoutL = Min_list[-1], Mout_list[-1]
+        # same = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()
+        # diff = 1.0 - same
+        # K_idea = (same * sigma_in + diff * sigma_out).to(self.device)
+
+        # loss_idea_in  = masked_mse(K_out, K_idea, MinL)          # 类内 top-k
+        # loss_idea_out = masked_mse(K_out, K_idea, MoutL) if sigma_out > 0 else torch.zeros((), device=self.device)
+        # loss_idea = loss_idea_in + loss_idea_out
+
         losses = {
             "loss_align_K": loss_align_K,
             "loss_align_Z": loss_align_Z,
-            "loss_idea":  loss_idea,
-            "loss_pga":   lambda_align_K * loss_align_K + 
-                          lambda_align_Z * loss_align_Z +
-                          lambda_idea * loss_idea
+            "loss_idea":    0, #loss_idea,
+            "loss_pga":     lambda_align_K * loss_align_K
+                        + lambda_align_Z * loss_align_Z
+                        # + lambda_idea    * loss_idea
         }
         return losses

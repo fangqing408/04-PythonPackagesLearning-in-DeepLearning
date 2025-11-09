@@ -1,0 +1,14 @@
+\contentsline {section}{\numberline {1}Preface}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}前向传播}{2}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}反向传播}{2}{subsection.1.2}%
+\contentsline {section}{\numberline {2}Standard Softmax Gradient Analysis}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}雅可比矩阵}{3}{subsection.2.1}%
+\contentsline {paragraph}{(1) $\ell =j$：}{3}{section*.2}%
+\contentsline {paragraph}{(2) $\ell \neq j$：}{3}{section*.3}%
+\contentsline {subsection}{\numberline {2.2}海森矩阵}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Standard Softmax Analysis}{7}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Normalized Softmax Gradient Analysis}{8}{section.3}%
+\contentsline {section}{\numberline {4}PGA}{10}{section.4}%
+\contentsline {subsection}{\numberline {4.1}ArcFace 的切向合力}{10}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}PGA K/Z 对齐的切向合力}{12}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}是否对抗的充要判据（切空间内积）}{12}{subsection.4.3}%
