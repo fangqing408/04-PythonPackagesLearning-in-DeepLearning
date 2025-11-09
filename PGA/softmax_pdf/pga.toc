@@ -11,4 +11,4 @@
 \contentsline {section}{\numberline {4}PGA}{10}{section.4}%
 \contentsline {subsection}{\numberline {4.1}ArcFace 的切向合力}{10}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}PGA K/Z 对齐的切向合力}{12}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}是否对抗的充要判据（切空间内积）}{12}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.3}切空间内积判断对抗性}{12}{subsection.4.3}%
