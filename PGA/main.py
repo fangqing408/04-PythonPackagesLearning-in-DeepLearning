@@ -2,10 +2,10 @@ from torch.utils.data import DataLoader
 from torch import optim
 from pga import PGAHead
 from heads_arcface import ArcFaceHead
-from pga_wrapper import MobileNetWithPGA
 from models_resnet50 import ResNet50
 from dataset_overlap import OverlapSampler, OverlapDataset
 from dataset_pk import PKSampler, PKDataset
+from dataset_pkrandom import PKMixSampler
 from train_and_evaluate_MNIST import train_MNIST
 from train_and_evaluate_CASIA import train_CASIA
 from train_and_evaluate_CASIA_ResNet50 import train_CASIA_ResNet50
@@ -116,19 +116,19 @@ if __name__ == "__main__":
     dataset = PKDataset(root=config.casia_train_root, transform=config.train_transform)
     # 三天找不到原因，原来没打乱数据集，采样器直接顺序加载的导致每个 batch 里面最多只包含两个类别，导致每个 batch 里面的损失出现先降后升，最后一直降不下去的情况
     # 交叠了话，每个 batch 训练到的图是半静态的，怎么感觉越改越返璞归真
-    sampler = PKSampler(
-        data=dataset, 
-        P=config.pk_P,
-        K=config.pk_K,
-        shuffle=config.pk_shuffle
-    )
-    loader = DataLoader( 
-        dataset=dataset, 
-        batch_sampler=sampler,
-        # shuffle=config.dataloader_shuffle,
-        num_workers=config.num_workers, 
-        pin_memory=config.pin_memory, 
-        # drop_last=config.drop_last
+    # sampler = PKMixSampler(
+    #     data=dataset,
+    #     P=8, K=8,
+    #     random_size=448,
+    #     shuffle=True,
+    #     avoid_overlap=True
+    # )
+    sampler = PKSampler(dataset, 64, 8)
+    loader = DataLoader(
+        dataset=dataset,
+        batch_sampler=sampler,      # 用 batch_sampler，就不要再传 batch_size/shuffle
+        num_workers=config.num_workers,
+        pin_memory=config.pin_memory
     )
     # imgs, labels = next(iter(loader))
     # print(labels) # 验证当前的 loader 加载的数据集的打乱情况，当前的 loader 纯手动实现的加载，防止出现没有交叠出现学不到结构的情况
@@ -198,11 +198,10 @@ if __name__ == "__main__":
         optimizer_pga=optimizer_pga,
         scheduler_pga=scheduler_pga,
         device=config.device,
-        warmup_epochs=config.total_epochs,
-        total_epochs=config.total_epochs,
+        warmup_epochs=config.warmup_epochs,
+        total_epochs=config.total_epochs, 
         lambda_K=config.lambda_K,
         lambda_Z=config.lambda_Z, 
-        lambda_idea=config.lambda_idea,
         lambda_modify = config.lambda_modify
     )
 # MNIST 只有 10 类，特征维度低（28×28 灰度），类内差异很小，这意味着 batch 里每个类的样本有限，同类节点之间的相似度矩阵几乎是完美的块状结构

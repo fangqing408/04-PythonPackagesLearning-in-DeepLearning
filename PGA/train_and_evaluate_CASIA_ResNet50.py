@@ -52,24 +52,20 @@ def evaluate(model, head, pairs_file, root, device):
 
 def lambda_three_phase(epoch, total_epochs, warmup_epochs, peak_value, start_value=4, end_ratio=0.1, lambda_modify=False):
     rise_end = int(total_epochs * 0.5)
-    if lambda_modify:
-        flat_end = int(total_epochs * 0.7)
-    else:
-        flat_end = total_epochs
+    if lambda_modify: flat_end = int(total_epochs * 0.7)
+    else: flat_end = total_epochs
     end_value = peak_value * end_ratio
-    if epoch < warmup_epochs:
-        return start_value
+    if epoch < warmup_epochs: return start_value
     elif epoch < rise_end:
         t = (epoch - warmup_epochs) / max(rise_end - warmup_epochs, 1)
         return start_value + 0.5 * (1 - math.cos(math.pi * t)) * (peak_value - start_value)
-    elif epoch < flat_end:
-        return peak_value
+    elif epoch < flat_end: return peak_value
     else:
         t = (epoch - flat_end) / max(total_epochs - flat_end, 1)
         return end_value + 0.5 * (1 + math.cos(math.pi * t)) * (peak_value - end_value)
     
 def train_CASIA_ResNet50(name, model, head, pga, loader, lfw_test_root, pairs_file, optimizer, scheduler, optimizer_pga, scheduler_pga, device, 
-          warmup_epochs=10, total_epochs=100, lambda_K=64, lambda_Z=16, lambda_idea=1.0, lambda_modify=False):
+          warmup_epochs=10, total_epochs=100, lambda_K=64, lambda_Z=16, lambda_modify=False):
     writer = SummaryWriter(log_dir=name)
     model.train()
     pga.train()
@@ -78,31 +74,18 @@ def train_CASIA_ResNet50(name, model, head, pga, loader, lfw_test_root, pairs_fi
     log_step = 965
     win_cls = win_pga = win_grad = 0
     win_clip = win_step = 0
-    win_rawk = win_rawz = win_rawidea = win_rawpga = 0
+    win_rawk = win_rawz = win_rawpga = 0
 
     max_grad_norm = 15.0 # 本步总梯度大小超过 8，整体缩回到等效大小为 8
     for epoch in range(total_epochs):
         pbar = tqdm(loader, desc=f"[epoch {epoch}/{total_epochs - 1}]")
         total_cls_loss = 0.0
         total_pga_loss = 0.0
-        lambda_align_K = lambda_three_phase(
-            epoch=epoch, 
-            total_epochs=total_epochs, 
-            warmup_epochs=warmup_epochs, 
-            peak_value=lambda_K, 
-            start_value=0, 
-            end_ratio=0.1, 
-            lambda_modify=lambda_modify
+        lambda_align_K = lambda_three_phase(epoch=epoch, total_epochs=total_epochs, warmup_epochs=warmup_epochs, 
+            peak_value=lambda_K, start_value=0, end_ratio=0.1, lambda_modify=lambda_modify
         )
-        lambda_align_Z = lambda_three_phase(
-            epoch=epoch, 
-            total_epochs=total_epochs, 
-            warmup_epochs=warmup_epochs * 2, 
-            peak_value=lambda_Z, 
-            start_value=0, 
-            end_ratio=0.1, 
-            lambda_modify=lambda_modify
-        )
+        lambda_align_Z = lambda_three_phase(epoch=epoch, total_epochs=total_epochs, warmup_epochs=warmup_epochs * 2, 
+            peak_value=lambda_Z, start_value=0, end_ratio=0.1, lambda_modify=lambda_modify)
         clipped_cnt = 0
         grad_norm_sum = 0.0
         for imgs, labels in pbar:
@@ -110,26 +93,18 @@ def train_CASIA_ResNet50(name, model, head, pga, loader, lfw_test_root, pairs_fi
             labels = labels.to(device, non_blocking=True)
             feats, meta = model(imgs)
             if epoch >= warmup_epochs:
-                losses = pga(
-                    feats_final=feats, 
-                    labels=labels, 
-                    lambda_align_K=lambda_align_K, 
-                    lambda_align_Z=lambda_align_Z, 
-                    lambda_idea=lambda_idea
-                )
+                losses = pga(feats_final=feats, labels=labels, lambda_align_K=lambda_align_K, lambda_align_Z=lambda_align_Z, )
                 loss_pga = losses["loss_pga"]
                 raw_alignK = float(losses["loss_align_K"].item())
                 raw_alignZ = float(losses["loss_align_Z"].item())
-                raw_idea = float(losses["loss_idea"])
-                raw_pga = raw_alignK + raw_alignZ + raw_idea
+                raw_pga = raw_alignK + raw_alignZ
 
                 win_rawk += raw_alignK
                 win_rawz += raw_alignZ
-                win_rawidea += raw_idea
                 win_rawpga += raw_pga
-                logits = head(feats[-1], labels, enable=True if epoch >= 10 else False)
+                logits = head(feats[-1], labels, False)
             else: 
-                logits = head(feats[-1], labels, enable=True if epoch >= 10 else False)
+                logits = head(feats[-1], labels, False)
                 loss_pga = torch.zeros(1, device=device)
             cls_loss = F.cross_entropy(logits, labels)
             total_loss = cls_loss + loss_pga
@@ -141,7 +116,6 @@ def train_CASIA_ResNet50(name, model, head, pga, loader, lfw_test_root, pairs_fi
             params = list(model.parameters()) + list(head.parameters())
             if epoch >= warmup_epochs:
                 params += list(pga.parameters())
-
             # 把所有的参数的梯度拼成一个很长的向量，计算这个向量的长度，大于 max_norm，就整体的缩放，返回缩放前的长度
             grad_norm = clip_grad_norm_(params, max_norm=max_grad_norm)
             is_clipped = float(grad_norm > max_grad_norm)
@@ -150,12 +124,7 @@ def train_CASIA_ResNet50(name, model, head, pga, loader, lfw_test_root, pairs_fi
 
             total_cls_loss += cls_loss.item()
             total_pga_loss += loss_pga.item()
-            post = {
-                "cls": f"{cls_loss.item():.4f}",
-                "pga": f"{loss_pga.item():.4f}",
-                "grad": f"{float(grad_norm):.2f}",
-                "clip": int(is_clipped),
-            }
+            post = {"cls": f"{cls_loss.item():.4f}","pga": f"{loss_pga.item():.4f}","grad": f"{float(grad_norm):.2f}","clip": int(is_clipped),}
             if epoch >= warmup_epochs:
                 post["rawpga"] = f"{raw_pga:.4f}"
             pbar.set_postfix(post)
@@ -173,13 +142,7 @@ def train_CASIA_ResNet50(name, model, head, pga, loader, lfw_test_root, pairs_fi
             step += 1
 
             if step % log_step == 0 and step:
-                best_th, best_acc = evaluate(
-                    model=model, 
-                    head=head,
-                    pairs_file=pairs_file,
-                    root=lfw_test_root,
-                    device=device
-                )
+                best_th, best_acc = evaluate(model=model, head=head, pairs_file=pairs_file, root=lfw_test_root, device=device)
                 avg_cls = win_cls / win_step
                 avg_pga = win_pga / win_step
                 clip_ratio = win_clip / win_step
@@ -188,7 +151,6 @@ def train_CASIA_ResNet50(name, model, head, pga, loader, lfw_test_root, pairs_fi
                 writer.add_scalars("Loss/pga_raw", {
                     "rawk": win_rawk / win_step,
                     "rawz": win_rawz / win_step, 
-                    "rawidea": win_rawidea / win_step,
                     "rawpga": win_rawpga / win_step
                 }, step // log_step - 1)
 
@@ -220,7 +182,7 @@ def train_CASIA_ResNet50(name, model, head, pga, loader, lfw_test_root, pairs_fi
 
                 win_cls = win_pga = win_grad = 0.0
                 win_clip = win_step = 0
-                win_rawk = win_rawz = win_rawidea = win_rawpga = 0
+                win_rawk = win_rawz = win_rawpga = 0
         scheduler.step()
         if epoch >= warmup_epochs:
             scheduler_pga.step()

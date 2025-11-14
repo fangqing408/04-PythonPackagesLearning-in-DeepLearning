@@ -20,12 +20,12 @@ class Config:
     num_workers = 6
     pin_memory = True
     drop_last = True
-    tensorboard_name = "./train_casia_log_30/arcface_v1"
+    tensorboard_name = "./train_casia_log_30/default"
     embedding_size = 512
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cosine_scale = 16
     num_layers = 10
-    topk = 6
+    topk = 5
     t_diff = 1
     use_ema = True
     ema_m = 0.8
