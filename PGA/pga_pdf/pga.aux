@@ -58,7 +58,6 @@
 \citation{Oki:2020}
 \citation{Cho:2019}
 \citation{Mirzadeh:2020}
-\citation{Fawaz:2020}
 \@writefile{toc}{\contentsline {section}{\numberline {III}Proposed Approaches}{3}{}\protected@file@percent }
 \newlabel{sc:pa}{{III}{3}{}{section.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Notations and Definitions}{3}{}\protected@file@percent }
@@ -66,11 +65,12 @@
 \newlabel{eq:sumy}{{1}{3}{}{equation.1}{}}
 \newlabel{eq:y}{{2}{3}{}{equation.2}{}}
 \newlabel{eq:sm}{{3}{3}{}{equation.3}{}}
-\newlabel{eq:prob}{{4}{3}{}{equation.4}{}}
+\citation{Fawaz:2020}
 \citation{Szegedy:2016}
 \citation{Hinton:2015}
 \@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Notations and definitions}}{4}{}\protected@file@percent }
 \newlabel{tb:NaD}{{I}{4}{}{table.1}{}}
+\newlabel{eq:prob}{{4}{4}{}{equation.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}InceptionTime}{4}{}\protected@file@percent }
 \newlabel{ssc:it}{{\mbox  {III-B}}{4}{}{subsection.3.2}{}}
 \newlabel{eq:sce}{{5}{4}{}{equation.5}{}}
@@ -83,7 +83,7 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Knowledge Distillation for InceptionTime}{4}{}\protected@file@percent }
 \newlabel{ssc:kdit}{{\mbox  {III-D}}{4}{}{subsection.3.4}{}}
 \newlabel{eq:smt}{{10}{4}{}{equation.10}{}}
-\newlabel{eq:kld}{{11}{4}{}{equation.11}{}}
+\newlabel{eq:kld}{{11}{5}{}{equation.11}{}}
 \newlabel{eq:kdsce}{{12}{5}{}{equation.12}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Knowledge Distillation with Calibration for InceptionTime}{5}{}\protected@file@percent }
 \newlabel{ssc:kdcit}{{\mbox  {III-E}}{5}{}{subsection.3.5}{}}
@@ -95,21 +95,17 @@
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}1}Calibration by Translating}{5}{}\protected@file@percent }
 \newlabel{eq:ctl}{{13}{5}{}{equation.13}{}}
 \newlabel{eq:w}{{14}{5}{}{equation.14}{}}
-\newlabel{eq:ctlf}{{15}{5}{}{equation.15}{}}
-\newlabel{sssc:cbr}{{\mbox  {III-E}2}{5}{}{subsubsection.3.5.2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}2}Calibration by Reordering}{5}{}\protected@file@percent }
 \@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Algorithm of calibration by reordering}}{6}{}\protected@file@percent }
 \newlabel{ag:cr}{{1}{6}{}{algorithm.1}{}}
+\newlabel{eq:ctlf}{{15}{6}{}{equation.15}{}}
+\newlabel{sssc:cbr}{{\mbox  {III-E}2}{6}{}{subsubsection.3.5.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}2}Calibration by Reordering}{6}{}\protected@file@percent }
 \newlabel{sssc:actcr}{{\mbox  {III-E}3}{6}{}{subsubsection.3.5.3}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}3}Analysis of CT and CR}{6}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces A $3$-D example illustrating the color map of the distance between $\mathbf  {y}^{h}$ and $\mathbf  {y}^{t}$ after KDC in the label space}}{6}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Calibration by traslating}}}{6}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {Calibration by reordering}}}{6}{}\protected@file@percent }
 \newlabel{fg:mctcr}{{4}{6}{}{figure.4}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Algorithm of KDCTime}}{6}{}\protected@file@percent }
-\newlabel{ag:kdc}{{2}{6}{}{algorithm.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Problematic Datasets}}{6}{}\protected@file@percent }
-\newlabel{tb:pd}{{II}{6}{}{table.2}{}}
 \newlabel{eq:kdc}{{16}{6}{}{equation.16}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {IV}Experiments}{6}{}\protected@file@percent }
 \newlabel{sc:exp}{{IV}{6}{}{section.4}{}}
@@ -118,53 +114,54 @@
 \citation{Benavoli:2016}
 \citation{Garcia:2008}
 \citation{Demsar:2006}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Algorithm of KDCTime}}{7}{}\protected@file@percent }
+\newlabel{ag:kdc}{{2}{7}{}{algorithm.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Problematic Datasets}}{7}{}\protected@file@percent }
+\newlabel{tb:pd}{{II}{7}{}{table.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Critical difference diagram for different epochs}}{7}{}\protected@file@percent }
+\newlabel{fg:cdep}{{5}{7}{}{figure.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Critical difference diagram for different learning rates}}{7}{}\protected@file@percent }
+\newlabel{fg:cdlr}{{6}{7}{}{figure.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Hyperparameter Study for ITime-based Approaches}{7}{}\protected@file@percent }
 \newlabel{ssc:hsa}{{\mbox  {IV-A}}{7}{}{subsection.4.1}{}}
 \newlabel{sssc:bs}{{\mbox  {IV-A}1}{7}{}{subsubsection.4.1.1}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}1}Batch Size}{7}{}\protected@file@percent }
 \newlabel{sssc:epc}{{\mbox  {IV-A}2}{7}{}{subsubsection.4.1.2}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}2}Epoch}{7}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Critical difference diagram for different epochs}}{7}{}\protected@file@percent }
-\newlabel{fg:cdep}{{5}{7}{}{figure.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Critical difference diagram for different learning rates}}{7}{}\protected@file@percent }
-\newlabel{fg:cdlr}{{6}{7}{}{figure.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Critical difference diagram for different $\varepsilon $ in LSTime}}{7}{}\protected@file@percent }
-\newlabel{fg:lst}{{7}{7}{}{figure.7}{}}
 \newlabel{sssc:lr}{{\mbox  {IV-A}3}{7}{}{subsubsection.4.1.3}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}3}Learning Rate}{7}{}\protected@file@percent }
 \newlabel{sssc:lst}{{\mbox  {IV-A}4}{7}{}{subsubsection.4.1.4}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}4}$\varepsilon $ in LSTime}{7}{}\protected@file@percent }
-\newlabel{sssc:kdt}{{\mbox  {IV-A}5}{7}{}{subsubsection.4.1.5}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}5}$\varepsilon $ and $\tau $ in KDTime}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Critical difference diagram for different $\varepsilon $ in LSTime}}{8}{}\protected@file@percent }
+\newlabel{fg:lst}{{7}{8}{}{figure.7}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Critical difference diagram for different $\varepsilon $ in KDTime}}{8}{}\protected@file@percent }
 \newlabel{fg:kde}{{8}{8}{}{figure.8}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Critical difference diagram for different $\tau $ in KDTime}}{8}{}\protected@file@percent }
 \newlabel{fg:kdt}{{9}{8}{}{figure.9}{}}
+\newlabel{sssc:kdt}{{\mbox  {IV-A}5}{8}{}{subsubsection.4.1.5}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}5}$\varepsilon $ and $\tau $ in KDTime}{8}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Accuracy of Different Approaches}{8}{}\protected@file@percent }
 \newlabel{ssc:aa}{{\mbox  {IV-B}}{8}{}{subsection.4.2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Critical difference diagram illustrating the accuracy of different approaches}}{8}{}\protected@file@percent }
 \newlabel{fg:acc}{{10}{8}{}{figure.10}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Critical difference diagram illustrating the accuracy of three approaches on datasets with accuracy less than $0.8$ for KDTime}}{8}{}\protected@file@percent }
-\newlabel{fg:acc3}{{11}{8}{}{figure.11}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Training and Test Time of Different Approaches}{8}{}\protected@file@percent }
 \newlabel{ssc:ta}{{\mbox  {IV-C}}{8}{}{subsection.4.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Critical difference diagram illustrating the accuracy of three approaches on datasets with accuracy less than $0.8$ for KDTime}}{9}{}\protected@file@percent }
+\newlabel{fg:acc3}{{11}{9}{}{figure.11}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces The training time of KDCTime compared with ROCKET, ITime, LSTime, and KDTime}}{9}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {KDCTime and ROCKET}}}{9}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {KDCTime and ITime}}}{9}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {KDCTime and LSTime}}}{9}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {KDCTime and KDTime}}}{9}{}\protected@file@percent }
 \newlabel{fg:traint}{{12}{9}{}{figure.12}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {V}Conclusion}{9}{}\protected@file@percent }
-\newlabel{sc:conc}{{V}{9}{}{section.5}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces The test time of KDCTime compared with ROCKET, ITime, LSTime, and KDTime}}{9}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {KDCTime and ROCKET}}}{9}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {KDCTime and ITime}}}{9}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {KDCTime and LSTime}}}{9}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {KDCTime and KDTime}}}{9}{}\protected@file@percent }
 \newlabel{fg:testt}{{13}{9}{}{figure.13}{}}
-\@writefile{toc}{\contentsline {section}{Appendix\nobreakspace  A: The procedure to calculate $\delta $}{9}{}\protected@file@percent }
-\newlabel{ap:pcd}{{A}{9}{}{section.Appendix.A}{}}
-\newlabel{eq:doo}{{A}{9}{}{section.Appendix.A}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Conclusion}{9}{}\protected@file@percent }
+\newlabel{sc:conc}{{V}{9}{}{section.5}{}}
 \bibstyle{IEEEtran}
 \bibdata{IEEEabrv,TNNLS}
 \bibcite{Fawaz:2019}{1}
@@ -179,6 +176,16 @@
 \bibcite{Deng:2009}{10}
 \bibcite{Lines:2018}{11}
 \bibcite{Dempster:2020}{12}
+\@writefile{toc}{\contentsline {section}{Appendix\nobreakspace  A: The procedure to calculate $\delta $}{10}{}\protected@file@percent }
+\newlabel{ap:pcd}{{A}{10}{}{section.Appendix.A}{}}
+\newlabel{eq:doo}{{A}{10}{}{section.Appendix.A}{}}
+\newlabel{eq:dood}{{A}{10}{}{section.Appendix.A}{}}
+\newlabel{eq:lag}{{A}{10}{}{section.Appendix.A}{}}
+\newlabel{eq:kkt}{{A}{10}{}{section.Appendix.A}{}}
+\newlabel{eq:delta}{{A}{10}{}{section.Appendix.A}{}}
+\@writefile{toc}{\contentsline {section}{Appendix\nobreakspace  B: The accuracy of different approaches}{10}{}\protected@file@percent }
+\newlabel{ap:aa}{{B}{10}{}{section.Appendix.B}{}}
+\@writefile{toc}{\contentsline {section}{References}{10}{}\protected@file@percent }
 \bibcite{Ioffe:2015}{13}
 \bibcite{Srivastava:2014}{14}
 \bibcite{Szegedy:2016}{15}
@@ -198,13 +205,6 @@
 \bibcite{Gou:2021}{29}
 \bibcite{Romero:2014}{30}
 \bibcite{Yim:2017}{31}
-\newlabel{eq:dood}{{A}{10}{}{section.Appendix.A}{}}
-\newlabel{eq:lag}{{A}{10}{}{section.Appendix.A}{}}
-\newlabel{eq:kkt}{{A}{10}{}{section.Appendix.A}{}}
-\newlabel{eq:delta}{{A}{10}{}{section.Appendix.A}{}}
-\@writefile{toc}{\contentsline {section}{Appendix\nobreakspace  B: The accuracy of different approaches}{10}{}\protected@file@percent }
-\newlabel{ap:aa}{{B}{10}{}{section.Appendix.B}{}}
-\@writefile{toc}{\contentsline {section}{References}{10}{}\protected@file@percent }
 \bibcite{Svitov:2020}{32}
 \bibcite{Oki:2020}{33}
 \bibcite{Cho:2019}{34}
@@ -217,9 +217,9 @@
 \@writefile{toc}{\contentsline {subsection}{Xueyuan Gong}{11}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{Yain-Whar Si}{11}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{Yongqi Tian}{11}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{Cong Lin}{11}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{Xinyuan Zhang}{11}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{Xiaoxiang Liu}{11}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces The accuracy of different approaches}}{12}{}\protected@file@percent }
-\newlabel{tb:aa}{{III}{12}{}{table.3}{}}
-\gdef \@abspage@last{12}
+\@writefile{toc}{\contentsline {subsection}{Cong Lin}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{Xinyuan Zhang}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{Xiaoxiang Liu}{12}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces The accuracy of different approaches}}{13}{}\protected@file@percent }
+\newlabel{tb:aa}{{III}{13}{}{table.3}{}}
+\gdef \@abspage@last{13}

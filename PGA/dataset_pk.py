@@ -26,7 +26,7 @@ class PKDataset(Dataset):
         img_path, label = self.samples[idx]
         img = Image.open(img_path).convert("RGB")
         if self.transform: img = self.transform(img)
-        return img, label
+        return img, label, idx
 
 class PKSampler(Sampler):
     def __init__(self, data, P=16, K=16, shuffle=True):

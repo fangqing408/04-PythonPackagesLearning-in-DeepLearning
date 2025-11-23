@@ -17,5 +17,6 @@ mnist_test_torch
 mnist_train_torch
 lmdb
 checkpoints
+webface_112x112
 
 # log_files
